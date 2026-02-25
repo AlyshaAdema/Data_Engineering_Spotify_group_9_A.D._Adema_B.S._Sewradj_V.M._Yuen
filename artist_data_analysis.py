@@ -29,16 +29,42 @@ def unique_artists(data_frame):
 def correlation_followers_popularity(data_frame):
     return data_frame['followers'].corr(data_frame['artist_popularity'])
 
-def linear_regression(data_frame):
-    # linear regression model still needs to be implemented
-    return
+def correlation_follwers_genres(data_frame):
+    return data_frame['number_of_genres'].corr(data_frame['followers'])
 
-def top10_artists_genre(data_frame, genre):
+def correlation_popularity_genres(data_frame):
+    return data_frame['number_of_genres'].corr(data_frame['artist_popularity'])
+
+def linear_regression_set_up(data_frame):
+    popularity = data_frame['artist_popularity']
+    followers = data_frame['followers']
+    followers = sm.add_constant(followers)
+    return sm.OLS(popularity, followers).fit()
+
+def top10_followers_artists_genre(data_frame, genre):
     genres_data_frame = data_frame[data_frame['artist_genres'].apply(lambda x: genre in x)]
     return genres_data_frame.nlargest(10, 'followers')['name']
 
+def top10_popularity_artists_genre(data_frame, genre):
+    genres_data_frame = data_frame[data_frame['artist_genres'].apply(lambda x: genre in x)]
+    return genres_data_frame.nlargest(10, 'artist_popularity')['name']
+
 artist_data = get_artist_data('artist_data.csv')
+# model = linear_regression_set_up(artist_data)
+# print(model.summary())
+# print(correlation_popularity_genres(artist_data))
+# print(correlation_followers_popularity(artist_data))
 # print(unique_artists(artist_data))
 # advis.top10_followers(artist_data)
 # advis.top10_populartity(artist_data)
+# advis.linear_regression(artist_data)
+# advis.genres_histogram(artist_data)
 
+# meest voorkomende genres
+# minst voorkemende genres
+# hoeveel artiesten heeft een bepaalde genre
+# hoeveel volgers heeft een bepaalde genre
+# hoeveel artists hebben bepaalde popularity rating
+# gemiddelde popularity van een genre
+# gemiddelde volgers van een genre
+# miss iets met bepaalde artists (dus hoeveel followers die heeft)

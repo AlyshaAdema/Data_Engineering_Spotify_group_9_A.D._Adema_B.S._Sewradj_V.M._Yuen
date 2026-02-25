@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 def top10_followers(data_frame):
     top10_followers = data_frame.nlargest(10, 'followers')
@@ -21,6 +22,18 @@ def top10_populartity(data_frame):
     plt.tight_layout()
     plt.show()
 
-def genres_histogram(data_frame):
-    return
+def linear_regression(data_frame):
+    followers, popularity = np.polyfit(data_frame['followers'], data_frame['artist_popularity'], 1)
+    plt.scatter(data_frame['followers'], data_frame['artist_popularity'], color='purple')
+    plt.plot(data_frame['followers'], followers * data_frame['followers'] + popularity)
+    plt.text(1, 90, 'y = ' + '{:.3f}'.format(popularity) + ' + {:.3f}'.format(followers) + 'x', size=12)
+    plt.xlabel('Amount of followers')
+    plt.ylabel('Artist popularity')
+    plt.show()
 
+def genres_histogram(data_frame):
+    plt.hist(data_frame['number_of_genres'], bins=range(1, 7, 1))
+    plt.xlabel('Number of Genres')
+    plt.ylabel('Frequency')
+    plt.title('Distribution genres')
+    plt.show()
