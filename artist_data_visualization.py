@@ -12,7 +12,7 @@ def top10_followers(data_frame):
     plt.tight_layout()
     plt.show()
 
-def top10_populartity(data_frame):
+def top10_popularity(data_frame):
     top10_popularity = data_frame.nlargest(10, 'artist_popularity')
     plt.bar(top10_popularity['name'], top10_popularity['artist_popularity'])
     plt.xticks(rotation=90)

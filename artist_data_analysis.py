@@ -29,7 +29,7 @@ def unique_artists(data_frame):
 def correlation_followers_popularity(data_frame):
     return data_frame['followers'].corr(data_frame['artist_popularity'])
 
-def correlation_follwers_genres(data_frame):
+def correlation_followers_genres(data_frame):
     return data_frame['number_of_genres'].corr(data_frame['followers'])
 
 def correlation_popularity_genres(data_frame):
@@ -56,15 +56,46 @@ artist_data = get_artist_data('artist_data.csv')
 # print(correlation_followers_popularity(artist_data))
 # print(unique_artists(artist_data))
 # advis.top10_followers(artist_data)
-# advis.top10_populartity(artist_data)
+# advis.top10_popularity(artist_data)
 # advis.linear_regression(artist_data)
 # advis.genres_histogram(artist_data)
 
-# meest voorkomende genres
-# minst voorkemende genres
 # hoeveel artiesten heeft een bepaalde genre
+def artists_per_genre(data_frame, genre):
+    genres_data_frame = data_frame[data_frame['artist_genres'].apply(lambda x: genre in x)]
+    return len(genres_data_frame)
 # hoeveel volgers heeft een bepaalde genre
-# hoeveel artists hebben bepaalde popularity rating
-# gemiddelde popularity van een genre
+def total_followers_per_genre(data_frame, genre):
+    genres_data_frame = data_frame[data_frame['artist_genres'].apply(lambda x: genre in x)]
+    return genres_data_frame['followers'].sum()
 # gemiddelde volgers van een genre
+def average_followers_per_genre(data_frame, genre):
+    genres_data_frame = data_frame[data_frame['artist_genres'].apply(lambda x: genre in x)]
+    return int(genres_data_frame['followers'].mean() + 0.5)
+# gemiddelde popularity van een genre
+def average_popularity_per_genre(data_frame, genre):
+    genres_data_frame = data_frame[data_frame['artist_genres'].apply(lambda x: genre in x)]
+    return int(genres_data_frame['artist_popularity'].mean() + 0.5)
+# hoeveel artists hebben bepaalde popularity rating
+def artists_per_popularity_rating(data_frame, popularity):
+    popularity_data_frame = data_frame[data_frame['artist_popularity'] == popularity]
+    return len(popularity_data_frame)
+
+# meest voorkomende genres + visualization
+# def top10_genres_by_followers(data_frame):
+
+# artist per genre in data frame
+# rank it
+# top 10
+
+# minst voorkomende genres
+
 # miss iets met bepaalde artists (dus hoeveel followers die heeft)
+def look_up_artist(data_frame, artist):
+    artist_data_frame = data_frame[data_frame['name'] == artist]
+    print('name: %s' % artist)
+    print('popularity: %d' % artist_data_frame['artist_popularity'].mean())
+    print('followers: {:,.0f}'.format(artist_data_frame['followers'].mean()))
+    print('genres: %s' % ', '.join(artist_data_frame.loc[artist_data_frame['name'] == artist, 'artist_genres'].iloc[0]))
+
+# van bepaalde creativiteitspunten kunnen we nog visualizations maken
