@@ -23,10 +23,10 @@ def top10_populartity(data_frame):
     plt.show()
 
 def linear_regression(data_frame):
-    followers, popularity = np.polyfit(data_frame['followers'], data_frame['artist_popularity'], 1)
+    slope, intercept = np.polyfit(np.log1p(data_frame['followers']), data_frame['artist_popularity'], 1)
     plt.scatter(data_frame['followers'], data_frame['artist_popularity'], color='purple')
-    plt.plot(data_frame['followers'], followers * data_frame['followers'] + popularity)
-    plt.text(1, 90, 'y = ' + '{:.3f}'.format(popularity) + ' + {:.3f}'.format(followers) + 'x', size=12)
+    sorted_followers = np.sort(data_frame['followers'])
+    plt.plot(sorted_followers, intercept + slope * np.log1p(sorted_followers))
     plt.xlabel('Amount of followers')
     plt.ylabel('Artist popularity')
     plt.show()
