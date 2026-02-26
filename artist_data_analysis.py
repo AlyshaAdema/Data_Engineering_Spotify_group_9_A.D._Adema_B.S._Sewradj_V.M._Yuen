@@ -21,6 +21,9 @@ def get_artist_data(file_name):
     artist_data['genre_5'] = artist_data['genre_5'].astype(str)
     artist_data['genre_6'] = artist_data['genre_6'].astype(str)
     artist_data['number_of_genres'] = artist_data['artist_genres'].apply(len)
+    model = linear_regression_set_up(artist_data)
+    artist_data['predicted_popularity'] = model.predict(sm.add_constant(np.log1p(artist_data['followers'])))
+    artist_data['residual'] = artist_data['artist_popularity'] - artist_data['predicted_popularity']
     return artist_data
 
 def unique_artists(data_frame):
@@ -37,9 +40,15 @@ def correlation_popularity_genres(data_frame):
 
 def linear_regression_set_up(data_frame):
     popularity = data_frame['artist_popularity']
-    followers = data_frame['followers']
-    followers = sm.add_constant(followers)
+    log_followers = np.log1p(data_frame['followers'])
+    followers = sm.add_constant(log_followers)
     return sm.OLS(popularity, followers).fit()
+
+def find_legacy_artists(data_frame):
+    return data_frame.nsmallest(10, 'residual')['name']
+
+def find_over_performers(data_frame):
+    return data_frame.nlargest(10, 'residual')['name']
 
 def top10_followers_artists_genre(data_frame, genre):
     genres_data_frame = data_frame[data_frame['artist_genres'].apply(lambda x: genre in x)]
@@ -49,7 +58,12 @@ def top10_popularity_artists_genre(data_frame, genre):
     genres_data_frame = data_frame[data_frame['artist_genres'].apply(lambda x: genre in x)]
     return genres_data_frame.nlargest(10, 'artist_popularity')['name']
 
+
+
 artist_data = get_artist_data('artist_data.csv')
+advis.linear_regression(artist_data)
+print(find_legacy_artists(artist_data))
+print(find_over_performers(artist_data))
 # model = linear_regression_set_up(artist_data)
 # print(model.summary())
 # print(correlation_popularity_genres(artist_data))
@@ -57,7 +71,6 @@ artist_data = get_artist_data('artist_data.csv')
 # print(unique_artists(artist_data))
 # advis.top10_followers(artist_data)
 # advis.top10_populartity(artist_data)
-# advis.linear_regression(artist_data)
 # advis.genres_histogram(artist_data)
 
 # meest voorkomende genres
