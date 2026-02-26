@@ -32,7 +32,7 @@ def unique_artists(data_frame):
 def correlation_followers_popularity(data_frame):
     return data_frame['followers'].corr(data_frame['artist_popularity'])
 
-def correlation_follwers_genres(data_frame):
+def correlation_followers_genres(data_frame):
     return data_frame['number_of_genres'].corr(data_frame['followers'])
 
 def correlation_popularity_genres(data_frame):
@@ -74,7 +74,7 @@ print(find_over_performers(artist_data))
 # advis.genres_histogram(artist_data)
 
 # meest voorkomende genres
-# minst voorkemende genres
+# minst voorkomende genres
 # hoeveel artiesten heeft een bepaalde genre
 # hoeveel volgers heeft een bepaalde genre
 # hoeveel artists hebben bepaalde popularity rating
