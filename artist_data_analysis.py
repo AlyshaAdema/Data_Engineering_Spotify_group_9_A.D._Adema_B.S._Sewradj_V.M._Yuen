@@ -3,6 +3,7 @@ import pandas as pd
 import statsmodels.api as sm
 import numpy as np
 
+import artist_data_visualization
 # importing own files
 import artist_data_visualization as advis
 
@@ -81,15 +82,6 @@ def artists_per_popularity_rating(data_frame, popularity):
     popularity_data_frame = data_frame[data_frame['artist_popularity'] == popularity]
     return len(popularity_data_frame)
 
-# meest voorkomende genres + visualization
-# def top10_genres_by_followers(data_frame):
-
-# artist per genre in data frame
-# rank it
-# top 10
-
-# minst voorkomende genres
-
 # miss iets met bepaalde artists (dus hoeveel followers die heeft)
 def look_up_artist(data_frame, artist):
     artist_data_frame = data_frame[data_frame['name'] == artist]
@@ -98,4 +90,28 @@ def look_up_artist(data_frame, artist):
     print('followers: {:,.0f}'.format(artist_data_frame['followers'].mean()))
     print('genres: %s' % ', '.join(artist_data_frame.loc[artist_data_frame['name'] == artist, 'artist_genres'].iloc[0]))
 
+# meest voorkomende genres + visualization
+def data_frame_followers_all_genres(data_frame):
+    clean_exploded_data_frame = data_frame.explode('artist_genres').dropna()
+    genre_list = []
+    genres_data_frame = pd.DataFrame(columns=['genre', 'followers'])
+
+    for genre in clean_exploded_data_frame['artist_genres']:
+        if genre not in genre_list:
+            genre_list.append(genre)
+
+    for genre in genre_list:
+        total_followers = total_followers_per_genre(data_frame, genre)
+        genres_data_frame.loc[len(genres_data_frame)] = [genre, total_followers]
+
+    return genres_data_frame
+
+def top10_genres_by_most_followers(data_frame):
+    return data_frame_followers_all_genres(data_frame).nlargest(10, 'followers')
+
+# minst voorkomende genres
+def top10_genres_by_least_followers(data_frame):
+    return data_frame_followers_all_genres(data_frame).nsmallest(10, 'followers')
+
 # van bepaalde creativiteitspunten kunnen we nog visualizations maken
+#     eentje die we kunnen doen is correlation tussen aantal artiesten en aantal volgers

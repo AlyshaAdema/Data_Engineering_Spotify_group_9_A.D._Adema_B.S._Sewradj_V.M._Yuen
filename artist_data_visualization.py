@@ -32,7 +32,7 @@ def linear_regression(data_frame):
     plt.show()
 
 def genres_histogram(data_frame):
-    plt.hist(data_frame['number_of_genres'], bins=range(1, 7, 1))
+    plt.hist(data_frame['number_of_genres'], bins=range(0, 10, 1))
     plt.xlabel('Number of Genres')
     plt.ylabel('Frequency')
     plt.title('Distribution genres')
