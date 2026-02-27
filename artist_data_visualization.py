@@ -12,7 +12,7 @@ def top10_followers(data_frame):
     plt.tight_layout()
     plt.show()
 
-def top10_populartity(data_frame):
+def top10_popularity(data_frame):
     top10_popularity = data_frame.nlargest(10, 'artist_popularity')
     plt.bar(top10_popularity['name'], top10_popularity['artist_popularity'])
     plt.xticks(rotation=90)
@@ -32,7 +32,7 @@ def linear_regression(data_frame):
     plt.show()
 
 def genres_histogram(data_frame):
-    plt.hist(data_frame['number_of_genres'], bins=range(1, 7, 1))
+    plt.hist(data_frame['number_of_genres'], bins=range(0, 10, 1))
     plt.xlabel('Number of Genres')
     plt.ylabel('Frequency')
     plt.title('Distribution genres')
