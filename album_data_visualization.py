@@ -32,75 +32,141 @@ def release_year_vs_popularity(database):
     df = pd.read_sql_query("SELECT release_date, album_popularity FROM albums_data", database)
     df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
     df["year"] = df["release_date"].dt.year
-    df["year_bin"] = pd.cut(
-        df["year"],
-        bins=np.arange(df["year"].min(), df["year"].max() + 20, 20)
-    )
-    year_counts = df["year_bin"].value_counts().sort_index()
 
-    fig, ax = plt.subplots(1, 2, figsize=(12,5))
+    result = df.groupby("year")["album_popularity"].mean()
+    print(result)
 
-    ax[0].scatter(df["year"], df["album_popularity"])
-    ax[0].set_xlabel("Release Year")
-    ax[0].set_ylabel("Album Popularity")
-    ax[0].set_title("Release Year vs Album Popularity")
-
-    ax[1].bar(year_counts.index.astype(str), year_counts.values)
-    ax[1].set_xlabel("Release Year (20-year bins)")
-    ax[1].set_ylabel("Number of Albums")
-    ax[1].set_title("Albums per Time Period")
-
-    ax[0].tick_params(axis="x", rotation=40)
-    ax[1].tick_params(axis="x", rotation=40)
-
-    plt.tight_layout()
+    result.plot()
+    plt.xlabel("Release Year")
+    plt.ylabel("Average Album Popularity")
+    plt.title("Average Album Popularity by Release Year")
     plt.show()
 
 def release_year_vs_duration(database):
     df = pd.read_sql_query("SELECT album_id, release_date, SUM(duration_sec) AS album_duration FROM albums_data GROUP BY album_id", database)
     df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
     df["year"] = df["release_date"].dt.year
-    df["duration_hours"] = df["album_duration"] / 3600
-    duration_bins = pd.cut(
-        df["duration_hours"],
-        bins=np.arange(0, df["duration_hours"].max() + 0.5, 0.5)
-    )
-    duration_counts = duration_bins.value_counts().sort_index()
+    df = df.dropna(subset=["year"])
+    df["album_duration_min"] = df["album_duration"] / 60
 
-    fig, ax = plt.subplots(1, 2, figsize=(12,5))
-
-    ax[0].scatter(df["year"], df["duration_hours"])
-    ax[0].set_xlabel("Release Year")
-    ax[0].set_ylabel("Album Duration (hours)")
-    ax[0].set_title("Release Year vs Album Duration")
-
-    ax[1].bar(duration_counts.index.astype(str), duration_counts.values)
-    ax[1].set_xlabel("Album Duration (hours)")
-    ax[1].set_ylabel("Number of Albums")
-    ax[1].set_title("Album Duration Distribution")
-    ax[1].tick_params(axis="x", rotation=40)
-
-    plt.tight_layout()
+    average_duration = df.groupby("year")["album_duration_min"].mean().sort_index()
+    average_duration.plot()
+    plt.xlabel("Release Year")
+    plt.ylabel("Average Album Duration (minutes)")
+    plt.title("Average Album Duration by Release Year")
     plt.show()
 
-# def total_tracks_vs_album_duration(database):
+    # def total_tracks_vs_album_duration(database):
 #     df = pd.read_sql_query("SELECT album_id, MAX(total_tracks) AS total_tracks, SUM(duration_sec) AS album_duration_sec FROM albums_data GROUP BY album_id", database)
 #     df["duration_hours"] = df["album_duration_sec"] / 3600
-#
 #     fig, ax = plt.subplots(1, 2, figsize=(12,5))
-#
 #     ax[0].scatter(df["total_tracks"], df["duration_hours"])
 #     ax[0].set_xlabel("Total tracks")
 #     ax[0].set_ylabel("Album duration (hours)")
 #     ax[0].set_title("Total Tracks vs Album Duration")
-#
 #     mean_by_tracks = df.groupby("total_tracks")["duration_hours"].mean().sort_index()
 #     ax[1].bar(mean_by_tracks.index.astype(int), mean_by_tracks.values)
 #     ax[1].set_xlabel("Total tracks")
 #     ax[1].set_ylabel("Avg album duration (hours)")
 #     ax[1].set_title("Average Duration by Total Tracks")
-#
 #     plt.tight_layout()
 #     plt.show()
 # deze is misschien beetje bs want het is logisch dat meer liedjes = langere album
 
+def total_tracks_vs_popularity(database):
+    df = pd.read_sql_query("SELECT album_id, MAX(total_tracks) AS total_tracks, MAX(album_popularity) AS album_popularity FROM albums_data GROUP BY album_id", database)
+    plt.scatter(df["total_tracks"],df["album_popularity"], alpha=0.5)
+    plt.xlabel("Total Tracks in Album")
+    plt.ylabel("Album Popularity")
+    plt.title("Total Tracks vs Album Popularity")
+    plt.show()
+
+    average_popularity = df.groupby("total_tracks")["album_popularity"].mean().sort_index()
+    average_popularity.plot()
+    plt.xlabel("Total Tracks in Album")
+    plt.ylabel("Album Popularity")
+    plt.title("Total Tracks vs Album Popularity")
+    plt.show()
+
+def album_type_vs_popularity(database):
+    df = pd.read_sql_query("SELECT album_id, album_type, MAX(album_popularity) AS album_popularity FROM albums_data GROUP BY album_id", database)
+    average_popularity = df.groupby("album_type")["album_popularity"].mean()
+    average_popularity.plot(kind="bar")
+    plt.xlabel("Album Type")
+    plt.ylabel("Average Album Popularity")
+    plt.title("Average Album Popularity by Album Type")
+    plt.show()
+
+def album_collabs(database):
+    df = pd.read_sql_query("""
+    SELECT 
+        album_id,
+        (   CASE WHEN artist_0 IS NOT NULL AND TRIM(artist_0) != '' THEN 1 ELSE 0 END +
+            CASE WHEN artist_1 IS NOT NULL AND TRIM(artist_1) != '' THEN 1 ELSE 0 END +
+            CASE WHEN artist_2 IS NOT NULL AND TRIM(artist_2) != '' THEN 1 ELSE 0 END +
+            CASE WHEN artist_3 IS NOT NULL AND TRIM(artist_3) != '' THEN 1 ELSE 0 END +
+            CASE WHEN artist_4 IS NOT NULL AND TRIM(artist_4) != '' THEN 1 ELSE 0 END +
+            CASE WHEN artist_5 IS NOT NULL AND TRIM(artist_5) != '' THEN 1 ELSE 0 END +
+            CASE WHEN artist_6 IS NOT NULL AND TRIM(artist_6) != '' THEN 1 ELSE 0 END +
+            CASE WHEN artist_7 IS NOT NULL AND TRIM(artist_7) != '' THEN 1 ELSE 0 END +
+            CASE WHEN artist_8 IS NOT NULL AND TRIM(artist_8) != '' THEN 1 ELSE 0 END +
+            CASE WHEN artist_9 IS NOT NULL AND TRIM(artist_9) != '' THEN 1 ELSE 0 END +
+            CASE WHEN artist_10 IS NOT NULL AND TRIM(artist_10) != '' THEN 1 ELSE 0 END +
+            CASE WHEN artist_11 IS NOT NULL AND TRIM(artist_11) != '' THEN 1 ELSE 0 END
+        ) AS artist_count
+    FROM albums_data
+    GROUP BY album_id
+    """, database)
+
+    solo = df[df["artist_count"] == 1]
+    collabs = df[df["artist_count"] > 1]
+    labels = ["Solo albums", "Collaboration albums"]
+    values = [len(solo), len(collabs)]
+
+    plt.bar(labels, values)
+    plt.ylabel("Number of Albums")
+    plt.title("Solo vs Collaboration Albums")
+    plt.show()
+
+def top_10_labels_singles_vs_albums(database):
+    df = pd.read_sql_query("""
+        SELECT 
+            album_id,
+            MAX(label) AS label,
+            MAX(total_tracks) AS total_tracks
+        FROM albums_data
+        GROUP BY album_id
+    """, database)
+
+    df = df[df["label"].notna() & (df["label"].str.strip() != "")]
+
+    singles = df[df["total_tracks"] == 1]
+    albums = df[df["total_tracks"] > 1]
+
+    top_singles = singles["label"].value_counts().head(10)
+    top_albums = albums["label"].value_counts().head(10)
+
+    print("Top 10 labels for singles:")
+    print(top_singles)
+
+    print("\nTop 10 labels for albums:")
+    print(top_albums)
+
+    fig, ax = plt.subplots(1, 2, figsize=(14, 5))
+
+    top_singles.plot(kind="bar", ax=ax[0])
+    ax[0].set_title("Top 10 Labels for Singles")
+    ax[0].set_xlabel("Label")
+    ax[0].set_ylabel("Count")
+    ax[0].tick_params(axis="x", rotation=45)
+
+    top_albums.plot(kind="bar", ax=ax[1])
+    ax[1].set_title("Top 10 Labels for Albums")
+    ax[1].set_xlabel("Label")
+    ax[1].set_ylabel("Count")
+    ax[1].tick_params(axis="x", rotation=45)
+
+    plt.tight_layout()
+    plt.show()
+
+top_10_labels_singles_vs_albums(database)
