@@ -31,7 +31,7 @@ def top10_percent_tracks(database, feature):
     # top 10% van tracks per feature. nieuwe df met naam artiest, welke artiest komt meest voor
 # betere functie naam
 
-def relation_ship_artist_album_popularity(database):
+def relationship_artist_album_popularity(database):
     df = pd.read_sql_query("SELECT al.album_popularity, ar.artist_popularity FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id", database)
     correlation = df["album_popularity"].corr(df["artist_popularity"])
     print('The correlation between album popularity and artist popularity is: %f' % correlation)
