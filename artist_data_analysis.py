@@ -87,33 +87,31 @@ def artists_per_popularity_rating(database, popularity):
 def look_up_artist(database, artist):
     df = pd.read_sql_query("SELECT name, artist_popularity, followers, artist_genres FROM artist_data", database)
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
-    artist_data_frame = df[df['name'] == artist]
+    artist_df = df[df['name'] == artist]
     print('name: %s' % artist)
-    print('popularity: %d' % artist_data_frame['artist_popularity'].mean())
-    print('followers: {:,.0f}'.format(artist_data_frame['followers'].mean()))
-    print('genres: %s' % ', '.join(artist_data_frame.loc[artist_data_frame['name'] == artist, 'artist_genres'].iloc[0]))
+    print('popularity: %d' % artist_df['artist_popularity'].mean())
+    print('followers: {:,.0f}'.format(artist_df['followers'].mean()))
+    print('genres: %s' % ', '.join(artist_df.loc[artist_df['name'] == artist, 'artist_genres'].iloc[0]))
 
 # meest voorkomende genres + visualization
-def data_frame_followers_all_genres(database):
+def df_followers_all_genres(database):
     df = pd.read_sql_query("SELECT artist_genres, followers FROM artist_data", database)
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
-    clean_exploded_data_frame = df.explode('artist_genres').dropna()
-    genres_data_frame = pd.DataFrame(columns=['genre', 'followers'])
+    clean_exploded_df = df.explode('artist_genres').dropna()
+    genres_df = pd.DataFrame(columns=['genre', 'followers'])
 
-    for genre in clean_exploded_data_frame['artist_genres'].unique():
-        total_followers = clean_exploded_data_frame[
-            clean_exploded_data_frame['artist_genres'] == genre
+    for genre in clean_exploded_df['artist_genres'].unique():
+        total_followers = clean_exploded_df[
+            clean_exploded_df['artist_genres'] == genre
             ]['followers'].sum()
-        genres_data_frame.loc[len(genres_data_frame)] = [genre, total_followers]
+        genres_df.loc[len(genres_df)] = [genre, total_followers]
 
-    return genres_data_frame
+    return genres_df
 
-def top10_genres_by_most_followers(database):
-    return data_frame_followers_all_genres(database).nlargest(10, 'followers')
+# meest voorkomende genres (True), minst voorkomende genres (False)
+def top10_genres_by_most_or_least_followers(database, most_followers=True):
+    return df_followers_all_genres(database).sort_values('followers', ascending=not most_followers).head(10)
 
-# minst voorkomende genres
-def top10_genres_by_least_followers(database):
-    return data_frame_followers_all_genres(database).nsmallest(10, 'followers')
 
 # van bepaalde creativiteitspunten kunnen we nog visualizations maken
 #     eentje die we kunnen doen is correlation tussen aantal artiesten en aantal volgers

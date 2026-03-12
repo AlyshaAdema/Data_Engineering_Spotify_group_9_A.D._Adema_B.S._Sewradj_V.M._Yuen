@@ -6,16 +6,15 @@ import part3_dingen_testen as p3dt
 import artist_data_analysis as ada
 
 database = sqlite3.connect('spotify_database.db')
-# dit werkt nog niet helemaal moet nog gefixed worden
-# database.execute("ALTER TABLE tracks_data ADD COLUMN collaboration TEXT;")
-database.execute("UPDATE tracks_data SET collaboration = (SELECT CASE WHEN albums_data.artist_1 != '' THEN 'true' ELSE 'false' END FROM albums_data WHERE tracks_data.id = albums_data.track_id)")
-print(pd.read_sql_query("SELECT t.collaboration, al.artist_1 FROM tracks_data t JOIN albums_data al ON t.id = al.track_id", database))
+database.execute("UPDATE tracks_data SET collaboration = 'false'")
+database.execute("UPDATE tracks_data SET collaboration = 'true' WHERE id IN (SELECT track_id FROM albums_data WHERE artist_1 != '');")
+
 
 # even lover uittesten van taylor swift. conclusie: NIET CONSISTENT !!!!!!!!!!!! TAYLOR WAT DOE JE?
 # p3dt.album_features(database, '1NAmidJlEaVgA3MpcPFYGq', 'valence', visualization=True)
 
-# danceability, various artists staat bovenaan, stands out want heel veel hoger dan de rest, maar dat is omdat het meerdere artiesten zijn bij 1 lied, dus is niet een unieke artiest
-# p3dt.top10_percent_tracks(database, 'liveness')
+# val: ik heb ervoor gezorgd dat 'Various Artists' niet meer wordt vertoond, want toen ik die artist_id ging opzoeken in excel, stond er elke keer gewoon een
+# p3dt.top10_artists_per_feature(database, 'danceability')
 
 # dus positieve correlation tussen album popularity en artist popularity (dus als artiest populair is is album wss ook populair, maar hoeft niet altijd zo te zijn want correlation is niet 1)
 # p3dt.relation_ship_artist_album_popularity(database)
@@ -27,6 +26,12 @@ print(pd.read_sql_query("SELECT t.collaboration, al.artist_1 FROM tracks_data t 
 # p3dt.top10_artist_highest_proportion_explicit(database)
 
 # collaborations dingetje moet nog
+# p3dt.popularity_collaboration(database)
+
+# p3dt.average_artists_per_collab(database)
 
 # creativiteit deel wat kunnen we allemaal checken?
-#
+
+# p3dt.duration_explicit(database)
+
+p3dt.longest_or_shortest_explicit_or_non_explicit_tracks(database, longest=False, explicit=True)
