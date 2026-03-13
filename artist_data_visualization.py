@@ -44,3 +44,5 @@ def genres_histogram(database):
     plt.ylabel('Frequency')
     plt.title('Distribution genres')
     plt.show()
+
+print(top10_followers(database))
