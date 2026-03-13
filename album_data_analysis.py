@@ -28,13 +28,6 @@ def release_year_vs_duration(database):
     print("Average album duration per year (minutes):")
     print(average_duration.reset_index(name="Average Duration (min)"))
 
-# def total_tracks_vs_duration(database):
-#     df = pd.read_sql_query("SELECT album_id, MAX(total_tracks) AS total_tracks, SUM(duration_sec) AS album_duration_sec FROM albums_data GROUP BY album_id", database)
-#     df["duration_hours"] = df["album_duration_sec"] / 3600
-#     correlation = df["total_tracks"].corr(df["duration_hours"])
-#     print("The correlation between the total tracks and album duration is %f, so albums with more tracks tend to be longer."  % correlation)
-# deze is misschien beetje bs want het is logisch dat meer liedjes = langere album
-
 def total_tracks_vs_popularity(database):
     df = pd.read_sql_query("SELECT album_id, MAX(total_tracks) AS total_tracks, MAX(album_popularity) AS album_popularity FROM albums_data GROUP BY album_id", database)
     average_popularity = df.groupby("total_tracks")["album_popularity"].mean().sort_index()
@@ -71,12 +64,12 @@ def album_collabs(database):
     solo = df[df["artist_count"] == 1]
     collabs = df[df["artist_count"] > 1]
 
-    print("Total albums:", len(df))
-    print("Solo albums:", len(solo))
-    print("Collaboration albums:", len(collabs))
+    print("Total songs:", len(df))
+    print("Solo songs:", len(solo))
+    print("Collaboration songs:", len(collabs))
 
     average_artists = collabs["artist_count"].mean()
-    print("Average artist count in collaboration albums:", average_artists)
+    print("Average artist count in collaboration songs:", average_artists)
 
 def top_10_labels(database):
     df = pd.read_sql_query("SELECT album_id, label, album_popularity FROM albums_data", database)
@@ -109,10 +102,13 @@ def top_10_labels_singles_vs_albums(database):
     print(top_albums)
 
 def unique_albums(database):
-    df = pd.read_sql_query("""
-                           SELECT COUNT(DISTINCT album_name) AS unique_albums
-                           FROM albums_data
-                           """, database)
-
+    df = pd.read_sql_query("SELECT COUNT(DISTINCT album_name) AS unique_albums FROM albums_data", database)
     print("Number of unique album names:", df["unique_albums"][0])
+
+def top_albums_per_era(database):
+    df = pd.read_sql_query("SELECT DISTINCT era, album_name, album_popularity FROM albums_data WHERE album_popularity IS NOT NULL", database)
+    top5 = df.groupby("era").head(5).reset_index(drop=True)
+    for era, group in top5.groupby("era"):
+        print(f"\nTop 5 albums of the {era}:")
+        print(group[["album_name", "album_popularity"]])
 
