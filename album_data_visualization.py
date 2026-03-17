@@ -170,3 +170,20 @@ def top_albums_per_era(database):
     plt.ylabel("Average Popularity")
     plt.show()
 
+def music_trends_over_time(database):
+    df = pd.read_sql_query("SELECT a.release_date, f.danceability, f.energy, f.valence, f.tempo FROM albums_data a JOIN features_data f ON a.track_id = f.id", database)
+    df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce')
+    df['year'] = df['release_date'].dt.year
+    trend = df.groupby('year')[['danceability', 'energy', 'valence', 'tempo']].mean()
+
+    trend[['danceability', 'energy', 'valence']].plot(figsize=(10, 6))
+    plt.title("Danceability, Energy, and Valence Over Time")
+    plt.xlabel("Year")
+    plt.ylabel("Average Value")
+
+    trend[['tempo']].plot(figsize=(10, 6))
+    plt.title("Tempo Over Time")
+    plt.xlabel("Year")
+    plt.ylabel("Average Tempo")
+    plt.show()
+
