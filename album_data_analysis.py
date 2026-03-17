@@ -1,10 +1,14 @@
-import ast
 import pandas as pd
-import statsmodels.api as sm
-import numpy as np
-import sqlite3
 
-database = sqlite3.connect('spotify_database.db')
+def unique_albums(database, eras):
+    eras_str = ','.join([f"'{era}'" for era in eras])
+    df = pd.read_sql_query(f"SELECT album_id FROM albums_data WHERE era in ({eras_str})", database)
+    return df['album_id'].nunique()
+
+def unique_tracks(database, eras):
+    eras_str = ','.join([f"'{era}'" for era in eras])
+    df = pd.read_sql_query(f"SELECT track_id FROM albums_data WHERE era in ({eras_str})", database)
+    return df['track_id'].nunique()
 
 def album_duration_vs_popularity(database):
     df = pd.read_sql_query("SELECT album_id, SUM(duration_sec) AS album_duration_sec, MAX(album_popularity) AS album_popularity FROM albums_data GROUP BY album_id", database)
@@ -58,11 +62,6 @@ def album_collabs(database):
             CASE WHEN artist_4 IS NOT NULL AND TRIM(artist_4) != '' THEN 1 ELSE 0 END +
             CASE WHEN artist_5 IS NOT NULL AND TRIM(artist_5) != '' THEN 1 ELSE 0 END +
             CASE WHEN artist_6 IS NOT NULL AND TRIM(artist_6) != '' THEN 1 ELSE 0 END +
-            CASE WHEN artist_7 IS NOT NULL AND TRIM(artist_7) != '' THEN 1 ELSE 0 END +
-            CASE WHEN artist_8 IS NOT NULL AND TRIM(artist_8) != '' THEN 1 ELSE 0 END +
-            CASE WHEN artist_9 IS NOT NULL AND TRIM(artist_9) != '' THEN 1 ELSE 0 END +
-            CASE WHEN artist_10 IS NOT NULL AND TRIM(artist_10) != '' THEN 1 ELSE 0 END +
-            CASE WHEN artist_11 IS NOT NULL AND TRIM(artist_11) != '' THEN 1 ELSE 0 END
         ) AS artist_count
     FROM albums_data
     GROUP BY album_id
@@ -108,11 +107,10 @@ def top_10_labels_singles_vs_albums(database):
     print("\nTop 10 labels for albums:")
     print(top_albums)
 
-def unique_albums(database):
+def unique_album_names(database):
     df = pd.read_sql_query("""
                            SELECT COUNT(DISTINCT album_name) AS unique_albums
                            FROM albums_data
                            """, database)
 
     print("Number of unique album names:", df["unique_albums"][0])
-

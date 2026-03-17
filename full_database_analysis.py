@@ -1,0 +1,104 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def album_features(database, album_id, feature, visualization=False):
+    allowed_features = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms']
+    if feature in allowed_features:
+        df = pd.read_sql_query(f"""SELECT a.track_number, f.{feature} FROM albums_data a JOIN features_data f ON a.track_id = f.id WHERE a.album_id = ?""", database, params=[album_id])
+        df = df.sort_values(by=['track_number'])
+        print('Statistics for feature: %s' % feature)
+        print('Mean: %f' % df[feature].mean())
+        print('Standard deviation: %f' % df[feature].std())
+        print('Minimum: %f' % df[feature].min())
+        print('Maximum: %f' % df[feature].max())
+        if visualization:
+            plt.plot(df['track_number'], df[feature])
+            plt.xticks(range(1, len(df) + 1, 1))
+            plt.xlabel('Track number')
+            plt.ylabel('%s values' % feature)
+            plt.title('Results of %s' % feature)
+            plt.show()
+
+# hier gaat het op album naam dus als er een album naam is die meerdere artiesten gebruiken gaat het fout (miss even navragen en dan aanpassen als nodig)
+def album_features_summary(database, album_name):
+    df = pd.read_sql_query("SELECT f.* FROM features_data f JOIN albums_data a ON f.id = a.track_id WHERE a.album_name = ?", database, params=[album_name])
+    print('Here follows a summary of feature scores on the album: %s' % album_name)
+    print('Danceability score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['danceability'].mean(), df['danceability'].min(), df['danceability'].max(), df['danceability'].std()))
+    print('Energy score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['energy'].mean(), df['energy'].min(), df['energy'].max(), df['energy'].std()))
+    print('Key score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['key'].mean(), df['key'].min(), df['key'].max(), df['key'].std()))
+    print('Loudness score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['loudness'].mean(), df['loudness'].min(), df['loudness'].max(), df['loudness'].std()))
+    print('Mode score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['mode'].mean(), df['mode'].min(), df['mode'].max(), df['mode'].std()))
+    print('Speechiness score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['speechiness'].mean(), df['speechiness'].min(), df['speechiness'].max(), df['speechiness'].std()))
+    print('Acousticness score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['acousticness'].mean(), df['acousticness'].min(), df['acousticness'].max(), df['acousticness'].std()))
+    print('Instrumentalness score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['instrumentalness'].mean(), df['instrumentalness'].min(), df['instrumentalness'].max(), df['instrumentalness'].std()))
+    print('Liveness score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['liveness'].mean(), df['liveness'].min(), df['liveness'].max(), df['liveness'].std()))
+    print('Valence score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['valence'].mean(), df['valence'].min(), df['valence'].max(), df['valence'].std()))
+    print('Tempo score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['tempo'].mean(), df['tempo'].min(), df['tempo'].max(), df['tempo'].std()))
+    print('Duration (per ms): average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['duration_ms'].mean(), df['duration_ms'].min(), df['duration_ms'].max(), df['duration_ms'].std()))
+
+def top10_percent_tracks(database, feature):
+    allowed_features = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms']
+    if feature in allowed_features:
+        df = pd.read_sql_query(f"""SELECT f.{feature}, ar.name FROM albums_data al JOIN features_data f ON al.track_id = f.id JOIN artist_data ar ON al.artist_id = ar.id""", database)
+        ten_percent = int(len(df) * 0.1 + 0.5)
+        top_df = df.nlargest(ten_percent, feature)[['name', feature]]
+        sorted_top_df = top_df['name'].value_counts()
+        print("The top 10 reoccuring artists for feature: %s" % feature)
+        print(sorted_top_df.nlargest(10))
+    # top 10% van tracks per feature. nieuwe df met naam artiest, welke artiest komt meest voor
+# betere functie naam
+
+def relationship_artist_album_popularity(database):
+    df = pd.read_sql_query("SELECT al.album_popularity, ar.artist_popularity FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id", database)
+    correlation = df["album_popularity"].corr(df["artist_popularity"])
+    print('The correlation between album popularity and artist popularity is: %f' % correlation)
+
+def explicit_tracks_popularity(database):
+    df = pd.read_sql_query("SELECT explicit, track_popularity FROM tracks_data", database)
+    explicit_tracks = df[df['explicit'] == 'true']
+    non_explicit_tracks = df[df['explicit'] == 'false']
+    average_explicit = int(explicit_tracks['track_popularity'].mean() + 0.5)
+    average_non_explicit = int(non_explicit_tracks['track_popularity'].mean() + 0.5)
+    print('The average popularity for explicit tracks is: %d and the average for non explicit tracks is: %d' % (average_explicit, average_non_explicit))
+
+def top10_artist_highest_proportion_explicit(database):
+    df = pd.read_sql_query("SELECT ar.name FROM tracks_data t JOIN albums_data al ON t.id = al.track_id JOIN artist_data ar ON al.artist_id = ar.id WHERE t.explicit = 'true'", database)
+    sorted_df = df['name'].value_counts()
+    print("The top 10 artists with the most explicit tracks is:")
+    print(sorted_df.nlargest(10))
+
+def number_albums_artist(database, artist):
+    df = pd.read_sql_query("SELECT al.album_id FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE ar.name = ? AND al.album_type == 'album'", database, params=(artist,))
+    return df['album_id'].nunique()
+
+def number_singles_artist(database, artist):
+    df = pd.read_sql_query("SELECT al.album_id FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE ar.name = ? AND al.album_type == 'single'", database, params=(artist,))
+    return df['album_id'].nunique()
+
+def number_tracks_artist(database, artist):
+    df = pd.read_sql_query("SELECT al.track_id FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE ar.name = ?", database, params=(artist,))
+    return df['track_id'].nunique()
+
+def most_popular_tracks(database, artist):
+    df = pd.read_sql_query("SELECT t.track_popularity, al.track_name FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id JOIN tracks_data t ON al.track_id = t.id WHERE ar.name = ? ", database, params=(artist,))
+    if df.empty:
+        return pd.DataFrame(columns=['track_name', 'track_popularity'])
+    return df.nlargest(5, 'track_popularity')
+
+def most_popular_albums(database, artist):
+    df = pd.read_sql_query("SELECT al.album_name, al.album_popularity FROM albums_data al JOIN artist_data ar on al.artist_id = ar.id WHERE ar.name = ? AND al.album_type == 'album'", database, params=(artist,))
+    if df.empty:
+        return pd.DataFrame(columns=['album_name', 'album_popularity'])
+    df = df.drop_duplicates(subset='album_name')
+    return df.nlargest(5, 'album_popularity')
+
+def artist_features(database, artist, feature, stat):
+    df = pd.read_sql_query(f"SELECT al.track_id, al.album_id, f.{feature} FROM albums_data al JOIN features_data f ON al.track_id = f.id JOIN artist_data ar ON al.artist_id = ar.id WHERE ar.name = ?", database, params=[artist])
+    if stat == 'mean':
+        return df[feature].mean()
+    if stat == 'max':
+        return df[feature].max()
+    if stat == 'min':
+        return df[feature].min()
+    if stat == 'std':
+        return df[feature].std()
