@@ -1,9 +1,9 @@
 import sqlite3
 import pandas as pd
-
+import datetime as dt
 # importing own files
-import part3_dingen_testen as p3dt
-import artist_data_analysis as ada
+import full_database_analysis as p3dt
+import album_data_analysis as ada
 
 database = sqlite3.connect('spotify_database.db')
 database.execute("UPDATE tracks_data SET collaboration = 'false'")
@@ -11,7 +11,7 @@ database.execute("UPDATE tracks_data SET collaboration = 'true' WHERE id IN (SEL
 
 
 # even lover uittesten van taylor swift. conclusie: NIET CONSISTENT !!!!!!!!!!!! TAYLOR WAT DOE JE?
-# p3dt.album_features(database, '1NAmidJlEaVgA3MpcPFYGq', 'valence', visualization=True)
+#p3dt.album_features(database, '1NAmidJlEaVgA3MpcPFYGq', 'valence', visualization=True)
 
 # val: ik heb ervoor gezorgd dat 'Various Artists' niet meer wordt vertoond, want toen ik die artist_id ging opzoeken in excel, stond er elke keer gewoon een
 # p3dt.top10_artists_per_feature(database, 'danceability')
@@ -35,3 +35,27 @@ database.execute("UPDATE tracks_data SET collaboration = 'true' WHERE id IN (SEL
 # p3dt.duration_explicit(database)
 
 p3dt.longest_or_shortest_explicit_or_non_explicit_tracks(database, longest=False, explicit=True)
+# hier doe ik mijn dingen voor deel 4 dus niet raar opkijken pls
+
+# outlier detection (moet nog gedaan worden maar kan denk ik het best bij de analysis van de verschillende datasets gezet worden dus bij artists data en bij features data/ tracks data moet nog even kijken want die is samen)
+
+# heb alle invalid records waar ik op kon komen gecheckt
+
+#cursor.execute("ALTER TABLE albums_data DROP COLUMN artists;")
+#database.commit()
+
+
+# album features score GEDAAAAAAAAAAAAAAAAAAAAAN
+#p3dt.album_features_summary(database, 'Reputation')
+
+# check artist_data for duplicates
+
+# group the features by the era and create barplots with the era on the x-axis that the average on the y-axis for all features you find interesting
+
+# iets met popularity en streams maar we hebben helemaal geen streams?!?!??!?!?!?
+
+# genres die het vaakst samen voorkomen
+
+# for features label tracks as very low, low, medium, high and very high and identify genres that occur frequently among other tracks that score very low or very high
+
+database.close()
