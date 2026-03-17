@@ -61,12 +61,12 @@ def album_collabs(database):
     solo = df[df["artist_count"] == 1]
     collabs = df[df["artist_count"] > 1]
 
-    print("Total albums:", len(df))
-    print("Solo albums:", len(solo))
-    print("Collaboration albums:", len(collabs))
+    print("Total songs:", len(df))
+    print("Solo songs:", len(solo))
+    print("Collaboration songs:", len(collabs))
 
     average_artists = collabs["artist_count"].mean()
-    print("Average artist count in collaboration albums:", average_artists)
+    print("Average artist count in collaboration songs:", average_artists)
 
 def top_10_labels(database):
     df = pd.read_sql_query("SELECT album_id, label, album_popularity FROM albums_data", database)
