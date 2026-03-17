@@ -67,6 +67,62 @@ def top10_artist_highest_proportion_explicit(database):
     print("The top 10 artists with the most explicit tracks is:")
     print(sorted_df.nlargest(10))
 
+def popularity_collaboration(database):
+    df = pd.read_sql_query("SELECT collaboration, track_popularity FROM tracks_data", database)
+
+    collaborations = df[df['collaboration'] == 'true']
+    non_collaborations = df[df['collaboration'] == 'false']
+
+    mean_popularity_collabs = int(collaborations['track_popularity'].mean() + 0.5)
+    mean_popularity_non_collabs = int(non_collaborations['track_popularity'].mean() + 0.5)
+
+    print("Average popularity of collaborations is: %d \nAverage popularity of non-collaborations is: %d." % (mean_popularity_collabs, mean_popularity_non_collabs))
+    if mean_popularity_collabs > mean_popularity_non_collabs:
+        print("Collaborations appear to be more popular on average.")
+    else:
+        print("Collaborations do not appear to be more popular.")
+
+## creativity:
+# gemiddeld aantal artiesten per collab (tracks & albums)
+def average_artists_per_collab(database):
+    artist_cols = [f'artist_{i}' for i in range(12)]
+    df = pd.read_sql_query(f"""SELECT track_name, {", ".join("al."+c for c in artist_cols)} FROM albums_data al JOIN tracks_data t ON al.track_id = t.id WHERE t.collaboration = 'true'""", database)
+
+    df["artist_list"] = df[artist_cols].apply(lambda row: [a for a in row.dropna() if a != ''], axis=1)
+    df["number_of_artists"] = df["artist_list"].apply(len)
+
+    avg_artists_per_collab = int(df["number_of_artists"].mean() + 0.5)
+
+    print("The average number of artists per collaboration is: %d" % avg_artists_per_collab)
+
+# are explicit tracks longer in duration? (tracks & albums)
+def duration_explicit(database):
+    df = pd.read_sql_query("""SELECT duration_sec, explicit FROM albums_data al JOIN tracks_data t ON al.track_id = t.id""", database)
+
+    explicit_tracks = df[df['explicit'] == 'true']
+    non_explicit_tracks = df[df['explicit'] == 'false']
+
+    avg_explicit = explicit_tracks['duration_sec'].mean() / 60
+    avg_non_explicit = non_explicit_tracks['duration_sec'].mean() / 60
+
+    print("Average duration of explicit tracks in minutes is: %.2f \nAverage duration of non-explicit tracks in minutes is: %.2f" % (avg_explicit, avg_non_explicit))
+    if avg_explicit > avg_non_explicit:
+        print("It appears that explicit tracks are longer in duration on average.")
+    else:
+        print("It appears that non-explicit tracks are longer in duration on average.")
+
+def longest_or_shortest_explicit_or_non_explicit_tracks(database, longest=True, explicit=True):
+    df = pd.read_sql_query("""SELECT track_name, duration_sec, explicit FROM albums_data al JOIN tracks_data t ON al.track_id = t.id""", database)
+
+    if explicit:
+        df = df[df['explicit'] == 'true']
+    else:
+        df = df[df['explicit'] == 'false']
+
+    result = df.sort_values("duration_sec", ascending=not longest).head(10)
+
+    print(result[["track_name", "duration_sec"]])
+
 def number_albums_artist(database, artist):
     df = pd.read_sql_query("SELECT al.album_id FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE ar.name = ? AND al.album_type == 'album'", database, params=(artist,))
     return df['album_id'].nunique()
