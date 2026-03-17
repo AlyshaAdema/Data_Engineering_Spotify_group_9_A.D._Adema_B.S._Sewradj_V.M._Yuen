@@ -1,7 +1,4 @@
-import ast
 import pandas as pd
-import statsmodels.api as sm
-import numpy as np
 import sqlite3
 
 database = sqlite3.connect('spotify_database.db')
@@ -27,13 +24,6 @@ def release_year_vs_duration(database):
     average_duration = df.groupby("year")["album_duration_min"].mean().sort_index()
     print("Average album duration per year (minutes):")
     print(average_duration.reset_index(name="Average Duration (min)"))
-
-# def total_tracks_vs_duration(database):
-#     df = pd.read_sql_query("SELECT album_id, MAX(total_tracks) AS total_tracks, SUM(duration_sec) AS album_duration_sec FROM albums_data GROUP BY album_id", database)
-#     df["duration_hours"] = df["album_duration_sec"] / 3600
-#     correlation = df["total_tracks"].corr(df["duration_hours"])
-#     print("The correlation between the total tracks and album duration is %f, so albums with more tracks tend to be longer."  % correlation)
-# deze is misschien beetje bs want het is logisch dat meer liedjes = langere album
 
 def total_tracks_vs_popularity(database):
     df = pd.read_sql_query("SELECT album_id, MAX(total_tracks) AS total_tracks, MAX(album_popularity) AS album_popularity FROM albums_data GROUP BY album_id", database)
@@ -85,15 +75,7 @@ def top_10_labels(database):
     print(result)
 
 def top_10_labels_singles_vs_albums(database):
-    df = pd.read_sql_query("""
-        SELECT 
-            album_id,
-            MAX(label) AS label,
-            MAX(total_tracks) AS total_tracks
-        FROM albums_data
-        GROUP BY album_id
-    """, database)
-
+    df = pd.read_sql_query("SELECT album_id, MAX(label) AS label MAX(total_tracks) AS total_track FROM albums_data GROUP BY album_id", database)
     df = df[df["label"].notna() & (df["label"].str.strip() != "")]
 
     singles = df[df["total_tracks"] == 1]
@@ -109,10 +91,42 @@ def top_10_labels_singles_vs_albums(database):
     print(top_albums)
 
 def unique_albums(database):
-    df = pd.read_sql_query("""
-                           SELECT COUNT(DISTINCT album_name) AS unique_albums
-                           FROM albums_data
-                           """, database)
-
+    df = pd.read_sql_query("SELECT COUNT(DISTINCT album_name) AS unique_albums FROM albums_data", database)
     print("Number of unique album names:", df["unique_albums"][0])
+
+def top_albums_per_era(database):
+    df = pd.read_sql_query("SELECT DISTINCT era, album_name, album_popularity FROM albums_data WHERE album_popularity IS NOT NULL", database)
+    top5 = df.groupby("era").head(5).reset_index(drop=True)
+    for era, group in top5.groupby("era"):
+        print(f"\nTop 5 albums of the {era}:")
+        print(group[["album_name", "album_popularity"]])
+
+#part 4
+def music_trends_over_time(database):
+    df = pd.read_sql_query("SELECT a.release_date, f.danceability, f.energy, f.valence, f.tempo FROM albums_data a JOIN features_data f ON a.track_id = f.id", database)
+    df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce')
+    df['year'] = df['release_date'].dt.year
+
+    trend = df.groupby('year')[['danceability', 'energy', 'valence', 'tempo']].mean()
+    print(trend)
+
+def outliers(database):
+    df = pd.read_sql("SELECT * FROM features_data", database)
+    features = [
+        'danceability', 'energy', 'loudness', 'speechiness',
+        'acousticness', 'instrumentalness', 'liveness',
+        'valence', 'tempo', 'duration_ms'
+    ]
+    outlier_counts = {}
+    for col in features:
+        Q1 = df[col].quantile(0.25)
+        Q3 = df[col].quantile(0.75)
+        IQR = Q3 - Q1
+
+        lower = Q1 - 1.5 * IQR
+        upper = Q3 + 1.5 * IQR
+
+        outliers = df[(df[col] < lower) | (df[col] > upper)]
+        outlier_counts[col] = len(outliers)
+    print(outlier_counts)
 

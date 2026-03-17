@@ -56,23 +56,6 @@ def release_year_vs_duration(database):
     plt.title("Average Album Duration by Release Year")
     plt.show()
 
-    # def total_tracks_vs_album_duration(database):
-#     df = pd.read_sql_query("SELECT album_id, MAX(total_tracks) AS total_tracks, SUM(duration_sec) AS album_duration_sec FROM albums_data GROUP BY album_id", database)
-#     df["duration_hours"] = df["album_duration_sec"] / 3600
-#     fig, ax = plt.subplots(1, 2, figsize=(12,5))
-#     ax[0].scatter(df["total_tracks"], df["duration_hours"])
-#     ax[0].set_xlabel("Total tracks")
-#     ax[0].set_ylabel("Album duration (hours)")
-#     ax[0].set_title("Total Tracks vs Album Duration")
-#     mean_by_tracks = df.groupby("total_tracks")["duration_hours"].mean().sort_index()
-#     ax[1].bar(mean_by_tracks.index.astype(int), mean_by_tracks.values)
-#     ax[1].set_xlabel("Total tracks")
-#     ax[1].set_ylabel("Avg album duration (hours)")
-#     ax[1].set_title("Average Duration by Total Tracks")
-#     plt.tight_layout()
-#     plt.show()
-# deze is misschien beetje bs want het is logisch dat meer liedjes = langere album
-
 def total_tracks_vs_popularity(database):
     df = pd.read_sql_query("SELECT album_id, MAX(total_tracks) AS total_tracks, MAX(album_popularity) AS album_popularity FROM albums_data GROUP BY album_id", database)
     plt.scatter(df["total_tracks"],df["album_popularity"], alpha=0.5)
@@ -169,4 +152,38 @@ def top_10_labels_singles_vs_albums(database):
     plt.tight_layout()
     plt.show()
 
-top_10_labels_singles_vs_albums(database)
+def songs_per_era(database):
+    df = pd.read_sql_query("SELECT era, COUNT(*) as song_count FROM albums_data GROUP BY era ORDER BY era", database)
+    df = df.set_index("era")
+
+    df.plot(kind="bar")
+    plt.xlabel("Era")
+    plt.ylabel("Number of Songs")
+    plt.title("Songs per Era")
+    plt.show()
+
+def top_albums_per_era(database):
+    df = pd.read_sql_query("SELECT DISTINCT era, album_name, album_popularity FROM albums_data WHERE album_popularity IS NOT NULL", database)
+    df_avg = df.groupby("era")["album_popularity"].mean()
+    df_avg.plot(kind="bar", title="Average Album Popularity per Era")
+    plt.xlabel("Era")
+    plt.ylabel("Average Popularity")
+    plt.show()
+
+def music_trends_over_time(database):
+    df = pd.read_sql_query("SELECT a.release_date, f.danceability, f.energy, f.valence, f.tempo FROM albums_data a JOIN features_data f ON a.track_id = f.id", database)
+    df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce')
+    df['year'] = df['release_date'].dt.year
+    trend = df.groupby('year')[['danceability', 'energy', 'valence', 'tempo']].mean()
+
+    trend[['danceability', 'energy', 'valence']].plot(figsize=(10, 6))
+    plt.title("Danceability, Energy, and Valence Over Time")
+    plt.xlabel("Year")
+    plt.ylabel("Average Value")
+
+    trend[['tempo']].plot(figsize=(10, 6))
+    plt.title("Tempo Over Time")
+    plt.xlabel("Year")
+    plt.ylabel("Average Tempo")
+    plt.show()
+
