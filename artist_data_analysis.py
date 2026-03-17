@@ -42,7 +42,7 @@ def find_over_performers(database):
     df = pd.read_sql_query("SELECT name, followers, artist_popularity FROM artist_data", database)
     df['predicted_popularity'] = model.predict(sm.add_constant(np.log1p(df['followers'])))
     df['residual'] = df['artist_popularity'] - df['predicted_popularity']
-    return df.largest(10, 'residual')['name']
+    return df.nlargest(10, 'residual')['name']
 
 def top10_followers_artists_genre(database, genre):
     df = pd.read_sql_query("SELECT name, followers, artist_genres FROM artist_data", database)

@@ -9,7 +9,7 @@ from features_data_visualization import speechiness_vs_danceability
 
 database = sqlite3.connect('spotify_database.db')
 
-# fdv.x(database)
+fdv.x(database)
 
 # uh, ik denk dat danceability varieert bij lage speechiness. opvallend is dat bij hoge speechiness zit danceability tussen 0.6 en 0.7. (en tussen speechiness van 0.5 en 0.9 zit weinig dancibility?)
 # fdv.speechiness_vs_danceability(database)
