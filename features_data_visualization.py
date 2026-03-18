@@ -4,9 +4,12 @@ import seaborn as sns
 
 def x(database):
     pd.set_option('display.max_columns', None)
-    df = pd.read_sql_query("SELECT * FROM features_data", database)
+    df = pd.read_sql_query("SELECT * FROM tracks_data", database)
     print(df.head(10))
     print(df.info())
+
+# def y(database):
+#     df
 
 # danceability vs speechiness
 def speechiness_vs_danceability(database):
