@@ -131,3 +131,20 @@ elif page == 'Artist':
 elif page == 'Album':
     st.title("Albums")
     name = st.sidebar.text_input('Enter an album name', 'reputation')
+    matching_artists = alda.artists_for_album(database, name)
+    selected_artist = st.sidebar.selectbox('Select the artist:', matching_artists)
+    album_duration = alda.album_duration(database, name, selected_artist)
+    label = alda.label(database, name, selected_artist)
+    total_tracks = alda.total_tracks(database, name, selected_artist)
+    release_date = alda.release_date(database, name, selected_artist)
+    st.markdown(f'Displayed Album: {name}')
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric( "Artist", selected_artist)
+    with col2:
+        st.metric("Album Duration (min)", album_duration)
+    with col3:
+        st.metric("Total Tracks", total_tracks)
+    with col4:
+        st.metric("Release Date", release_date.strftime("%Y-%m-%d"))
+    st.metric("Label", label)

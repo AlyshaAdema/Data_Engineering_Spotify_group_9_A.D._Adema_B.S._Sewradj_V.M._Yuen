@@ -132,3 +132,23 @@ def outliers(database):
         outlier_counts[col] = len(outliers)
     print(outlier_counts)
 
+def artists_for_album(database, album_name):
+    result = pd.read_sql_query(  "SELECT DISTINCT ar.name FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) ORDER BY ar.name", database, params=(album_name,))
+    return result["name"].tolist()
+
+def album_duration(database, album_name, artist_name):
+    df = pd.read_sql_query("SELECT SUM(duration_sec) AS album_duration_sec FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
+    return df["album_duration_sec"].iloc[0]/60
+
+def label(database, album_name, artist_name):
+    df = pd.read_sql_query("SELECT label AS label FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
+    return df["label"].iloc[0]
+
+def total_tracks(database, album_name, artist_name):
+    df = pd.read_sql_query("SELECT total_tracks AS total FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
+    return df["total"].iloc[0]
+
+def release_date(database, album_name, artist_name):
+    df = pd.read_sql_query("SELECT release_date FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
+    df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
+    return df["release_date"].dt.date.iloc[0]
