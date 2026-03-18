@@ -85,3 +85,30 @@ def comparison_three_features(database, feature1, feature2, feature3):
     pp.fig.suptitle(f"Comparison {feature1}, {feature2}, {feature3}", fontsize=16)
     pp.fig.subplots_adjust(top=0.95)
     plt.show()
+
+def outliers(database):
+    df = pd.read_sql("SELECT * FROM features_data", database)
+    features = [
+        'danceability', 'energy', 'loudness', 'speechiness',
+        'acousticness', 'instrumentalness', 'liveness',
+        'valence', 'tempo', 'duration_ms'
+    ]
+    outlier_counts = {}
+    for col in features:
+        Q1 = df[col].quantile(0.25)
+        Q3 = df[col].quantile(0.75)
+        IQR = Q3 - Q1
+
+        lower = Q1 - 1.5 * IQR
+        upper = Q3 + 1.5 * IQR
+
+        outliers = df[(df[col] < lower) | (df[col] > upper)]
+        outlier_counts[col] = len(outliers)
+
+    plt.figure(figsize=(15, 10))
+    for i, col in enumerate(features):
+        plt.subplot(4, 3, i + 1)
+        sns.boxplot(x=df[col])
+        plt.title(col)
+    plt.tight_layout()
+    plt.show()

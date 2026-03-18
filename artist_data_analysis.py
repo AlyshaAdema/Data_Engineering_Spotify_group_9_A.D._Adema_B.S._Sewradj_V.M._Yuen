@@ -3,9 +3,10 @@ import pandas as pd
 import statsmodels.api as sm
 import numpy as np
 
-def unique_artists(database):
-    df = pd.read_sql_query("SELECT name FROM artist_data", database)
-    return df['name'].nunique()
+def unique_artists(database, eras):
+    eras_str = ','.join([f"'{era}'" for era in eras])
+    df = pd.read_sql_query(f"SELECT ar.id, al.era FROM artist_data ar JOIN albums_data al ON ar.id = al.artist_id WHERE al.era IN ({eras_str})", database)
+    return df['id'].nunique()
 
 def correlation_followers_popularity(database):
     df = pd.read_sql_query("SELECT followers, artist_popularity FROM artist_data", database)
@@ -54,36 +55,30 @@ def top10_popularity_artists_genre(database, genre):
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
     return df[df['artist_genres'].apply(lambda x: genre in x)].nlargest(10, 'artist_popularity')['name']
 
-# hoeveel artiesten heeft een bepaalde genre
 def artists_per_genre(database, genre):
     df = pd.read_sql_query("SELECT artist_genres FROM artist_data", database)
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
     return len(df[df['artist_genres'].apply(lambda x: genre in x)])
 
-# hoeveel volgers heeft een bepaalde genre
 def total_followers_per_genre(database, genre):
     df = pd.read_sql_query("SELECT followers, artist_genres FROM artist_data", database)
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
     return df[df['artist_genres'].apply(lambda x: genre in x)].sum()
 
-# gemiddelde volgers van een genre
 def average_followers_per_genre(database, genre):
     df = pd.read_sql_query("SELECT followers, artist_genres FROM artist_data", database)
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
     return int(df[df['artist_genres'].apply(lambda x: genre in x)].mean() + 0.5)
 
-# gemiddelde popularity van een genre
 def average_popularity_per_genre(database, genre):
     df = pd.read_sql_query("SELECT artist_popularity, artist_genres FROM artist_data", database)
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
     return int(df[df['artist_genres'].apply(lambda x: genre in x)].mean() + 0.5)
 
-# hoeveel artists hebben bepaalde popularity rating
 def artists_per_popularity_rating(database, popularity):
     df = pd.read_sql_query("SELECT artist_popularity FROM arist_data", database)
     return len(df[df['artist_popularity'] == popularity])
 
-# miss iets met bepaalde artists (dus hoeveel followers die heeft)
 def look_up_artist(database, artist):
     df = pd.read_sql_query("SELECT name, artist_popularity, followers, artist_genres FROM artist_data", database)
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
@@ -93,9 +88,11 @@ def look_up_artist(database, artist):
     print('followers: {:,.0f}'.format(artist_df['followers'].mean()))
     print('genres: %s' % ', '.join(artist_df.loc[artist_df['name'] == artist, 'artist_genres'].iloc[0]))
 
-# meest voorkomende genres + visualization
-def df_followers_all_genres(database):
-    df = pd.read_sql_query("SELECT artist_genres, followers FROM artist_data", database)
+def df_followers_all_genres(database, eras):
+    if not eras:
+        return pd.DataFrame(columns=['genre', 'followers'])
+    eras_str = ','.join([f"'{era}'" for era in eras])
+    df = pd.read_sql_query(f"SELECT ar.artist_genres, ar.followers FROM artist_data ar JOIN albums_data al ON ar.id = al.artist_id WHERE era IN ({eras_str})", database)
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
     clean_exploded_df = df.explode('artist_genres').dropna()
     genres_df = pd.DataFrame(columns=['genre', 'followers'])
@@ -108,10 +105,21 @@ def df_followers_all_genres(database):
 
     return genres_df
 
-# meest voorkomende genres (True), minst voorkomende genres (False)
-def top10_genres_by_most_or_least_followers(database, most_followers=True):
-    return df_followers_all_genres(database).sort_values('followers', ascending=not most_followers).head(10)
+def top10_genres_by_most_or_least_followers(database, eras, most_followers=True):
+    return df_followers_all_genres(database, eras).sort_values('followers', ascending=not most_followers).head(10)
+
+def number_followers_artist(database, artist):
+    df = pd.read_sql_query("SELECT followers FROM artist_data WHERE name = ?", database, params=(artist,))
+    return df['followers'].mean()
+
+def popularity_artist(database, artist):
+    df = pd.read_sql_query("SELECT artist_popularity FROM artist_data WHERE name = ?", database, params=(artist,))
+    return df['artist_popularity'].mean()
 
 
-# van bepaalde creativiteitspunten kunnen we nog visualizations maken
-#     eentje die we kunnen doen is correlation tussen aantal artiesten en aantal volgers
+def genres_artist(database, artist):
+    df = pd.read_sql_query("SELECT artist_genres FROM artist_data WHERE name = ?", database, params=(artist,))
+    if df.empty:
+        return []
+    df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
+    return df['artist_genres'].iloc[0]

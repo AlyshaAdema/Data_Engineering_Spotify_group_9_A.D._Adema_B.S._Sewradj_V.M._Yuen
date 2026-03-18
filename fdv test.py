@@ -2,7 +2,6 @@ import sqlite3
 import pandas as pd
 
 # importing own files
-import part3_dingen_testen as p3dt
 import artist_data_analysis as ada
 import features_data_visualization as fdv
 from features_data_visualization import speechiness_vs_danceability

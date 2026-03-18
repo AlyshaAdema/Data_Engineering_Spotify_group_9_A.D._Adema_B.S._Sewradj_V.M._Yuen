@@ -1,6 +1,6 @@
 import sqlite3
 import pandas as pd
-import part3_dingen_testen as p3dt
+import full_database_analysis as p3dt
 
 database = sqlite3.connect("spotify_database.db")
 
