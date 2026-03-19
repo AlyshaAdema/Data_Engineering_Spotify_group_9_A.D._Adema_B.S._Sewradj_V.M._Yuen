@@ -88,6 +88,24 @@ def top10_genres_feature_ranking(database, feature, very_low=True):
         new_high_df = pd.DataFrame(columns=['genres', 'count'], data={'genres': genres_list, 'count': count_list})
         return new_high_df.head(10)
 
-# def top10_artists_feature_ranking(database, feature, very_low=True):
-#     pd.set_option('display.max_columns', None)
-#     df = pd.read_sql_query()
+def top10_artists_feature_ranking(database, feature, very_low=True):
+    pd.set_option('display.max_columns', None)
+    artist_cols = [f'artist_{i}' for i in range(7)]
+    df = pd.read_sql_query(f"""SELECT f.{feature}, {", ".join("al."+c for c in artist_cols)} FROM features_data f JOIN albums_data al ON al.track_id = f.id JOIN artist_data ar ON ar.id = al.artist_id""", database)
+    df["artist_list"] = df[artist_cols].apply(lambda row: [a for a in row.dropna() if a != ''], axis=1)
+    df['feature_ranking'] = pd.cut(df[feature], 5, labels=['very low', 'low', 'medium', 'high', 'very high'])
+
+    df = df.explode(column=['artist_list']).dropna(subset=['artist_list'])
+
+    if very_low:
+        low_df = df[df['feature_ranking'] == 'very low']
+        artist_list = low_df['artist_list'].value_counts().keys().tolist()
+        count_list = low_df['artist_list'].value_counts().tolist()
+        new_low_df = pd.DataFrame(columns=['artist', 'count'], data={'artist': artist_list, 'count': count_list})
+        return new_low_df.head(10)
+    else:
+        high_df = df[df['feature_ranking'] == 'very high']
+        artist_list = high_df['artist_list'].value_counts().keys().tolist()
+        count_list = high_df['artist_list'].value_counts().tolist()
+        new_high_df = pd.DataFrame(columns=['artist', 'count'], data={'artist': artist_list, 'count': count_list})
+        return new_high_df.head(10)
