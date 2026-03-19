@@ -77,10 +77,17 @@ def top10_genres_feature_ranking(database, feature, very_low=True):
 
     if very_low:
         low_df = df[df['feature_ranking'] == 'very low']
-        print(f"The top 10 most frequently occurring genres among tracks that score very low for {feature} are: ")
-        print(low_df['artist_genres'].value_counts().nlargest(10))
+        genres_list = low_df['artist_genres'].value_counts().keys().tolist()
+        count_list = low_df['artist_genres'].value_counts().tolist()
+        new_low_df = pd.DataFrame(columns=['genres', 'count'], data={'genres': genres_list, 'count': count_list})
+        return new_low_df.head(10)
     else:
         high_df = df[df['feature_ranking'] == 'very high']
-        print(f"The top 10 most frequently occurring genres among tracks that score very high for {feature} are: ")
-        print(high_df['artist_genres'].value_counts().nlargest(10))
+        genres_list = high_df['artist_genres'].value_counts().keys().tolist()
+        count_list = high_df['artist_genres'].value_counts().tolist()
+        new_high_df = pd.DataFrame(columns=['genres', 'count'], data={'genres': genres_list, 'count': count_list})
+        return new_high_df.head(10)
 
+# def top10_artists_feature_ranking(database, feature, very_low=True):
+#     pd.set_option('display.max_columns', None)
+#     df = pd.read_sql_query()
