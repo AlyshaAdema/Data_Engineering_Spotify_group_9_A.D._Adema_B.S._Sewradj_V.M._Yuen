@@ -77,15 +77,14 @@ elif page =='Features':
     min_feature = fda.feature_stats(database, selected_feature, selected_eras, 'min')
     max_feature = fda.feature_stats(database, selected_feature, selected_eras, 'max')
     std_feature = fda.feature_stats(database, selected_feature, selected_eras, 'std')
-    correlation_feature0 = fda.feature_correlation(database, selected_feature, compare_feature_list[0], selected_eras)
-    correlation_feature1 = fda.feature_correlation(database, selected_feature, compare_feature_list[1], selected_eras)
-    correlation_feature2 = fda.feature_correlation(database, selected_feature, compare_feature_list[2], selected_eras)
-    correlation_feature3 = fda.feature_correlation(database, selected_feature, compare_feature_list[3], selected_eras)
-    correlation_feature4 = fda.feature_correlation(database, selected_feature, compare_feature_list[4], selected_eras)
-    correlation_feature5 = fda.feature_correlation(database, selected_feature, compare_feature_list[5], selected_eras)
-    correlation_feature6 = fda.feature_correlation(database, selected_feature, compare_feature_list[6], selected_eras)
-    correlation_feature7 = fda.feature_correlation(database, selected_feature, compare_feature_list[7], selected_eras)
-    correlation_feature8 = fda.feature_correlation(database, selected_feature, compare_feature_list[8], selected_eras)
+    correlation_list = []
+    for i in range(len(compare_feature_list)):
+        correlation_list.append(fda.feature_correlation(database, selected_feature, compare_feature_list[i], selected_eras))
+    largest_index = 0
+    for i in range(1, len(correlation_list)):
+        if correlation_list[i] > correlation_list[largest_index]:
+            largest_index = i
+
     st.markdown(f'Displayed feature: {selected_feature}')
 
     col1, col2, col3, col4 = st.columns(4)
@@ -111,20 +110,39 @@ elif page =='Features':
     st.divider()
 
     col1, col2, col3, col4, col5 = st.columns(5)
+
     with col1:
-        st.metric(f"Correlation {compare_feature_list[0]} ", f"{correlation_feature0:,.2f}")
-        st.metric(f"Correlation {compare_feature_list[1]} ", f"{correlation_feature1:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[0]} ", f"{correlation_list[0]:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[1]} ", f"{correlation_list[1]:,.2f}")
     with col2:
-        st.metric(f"Correlation {compare_feature_list[2]} ", f"{correlation_feature2:,.2f}")
-        st.metric(f"Correlation {compare_feature_list[3]} ", f"{correlation_feature3:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[2]} ", f"{correlation_list[2]:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[3]} ", f"{correlation_list[3]:,.2f}")
     with col3:
-        st.metric(f"Correlation {compare_feature_list[4]} ", f"{correlation_feature4:,.2f}")
-        st.metric(f"Correlation {compare_feature_list[5]} ", f"{correlation_feature5:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[4]} ", f"{correlation_list[4]:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[5]} ", f"{correlation_list[5]:,.2f}")
     with col4:
-        st.metric(f"Correlation {compare_feature_list[6]} ", f"{correlation_feature6:,.2f}")
-        st.metric(f"Correlation {compare_feature_list[7]} ", f"{correlation_feature7:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[6]} ", f"{correlation_list[6]:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[7]} ", f"{correlation_list[7]:,.2f}")
     with col5:
-        st.metric(f"Correlation {compare_feature_list[8]} ", f"{correlation_feature8:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[8]} ", f"{correlation_list[8]:,.2f}")
+        st.metric(f"Most correlated to {selected_feature}", f"{compare_feature_list[largest_index]}")
+
+    st.divider()
+
+    chart_type = st.selectbox("Select metric to display:", ("Artists", "Genres"))
+    #left, right = st.columns(2)
+    #with left:
+        #if chart_type == "Artists":
+            #fig =
+        #if chart_type == "Genres":
+            #fig =
+        #st.pyplot(fig)
+    #with right:
+        #if chart_type == "Artists":
+            #fig =
+        #if chart_type == "Genres":
+            #fig =
+        #st.pyplot(fig)
 
 elif page == 'Genres':
     st.title('Genres')

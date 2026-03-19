@@ -96,3 +96,39 @@ def box_plot_feature_artist(database, artist, feature):
     ax.set_xlabel("Values")
     ax.set_title(f"Boxplot of {feature}")
     return fig
+
+def bar_plot_top10_genres_feature_ranking(database, feature, eras, very_low=True):
+    df = fda.top10_genres_feature_ranking(database, feature, eras, very_low)
+    if df is None or df.empty:
+        fig, ax = plt.subplots()
+        ax.set_title("No eras selected")
+        return fig
+    fig, ax = plt.subplots()
+    ax.bar(df['artist_genres'], df['count'])
+    ax.set_xticklabels(df['artist_genres'], rotation=90)
+    ax.set_xlabel('Genre')
+    ax.set_ylabel('Count')
+    if very_low:
+        ax.set_title(f'Top genres with very low {feature} score')
+    else:
+        ax.set_title(f'Top genres with very high {feature} score')
+    plt.tight_layout()
+    return fig
+
+def bar_plot_top10_artist_feature_ranking(database, feature, eras, very_low=True):
+    df = fda.top10_artists_feature_ranking(database, feature, eras, very_low)
+    if df is None or df.empty:
+        fig, ax = plt.subplots()
+        ax.set_title("No eras selected")
+        return fig
+    fig, ax = plt.subplots()
+    ax.bar(df['name'], df['count'])
+    ax.set_xticklabels(df['name'], rotation=90)
+    ax.set_xlabel('Name')
+    ax.set_ylabel('Count')
+    if very_low:
+        ax.set_title(f'Top artists with very low {feature} score')
+    else:
+        ax.set_title(f'Top artists with very high {feature} score')
+    plt.tight_layout()
+    return fig

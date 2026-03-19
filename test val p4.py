@@ -28,7 +28,7 @@ database = sqlite3.connect('spotify_database.db')
 # # vp4.check_exact_duplicates(database)
 # vp4.check_duplicates(database)
 
-vp4.most_frequent_genre_combinations(database)
+# vp4.most_frequent_genre_combinations(database)
 
 vp4.top10_genres_feature_ranking(database, "danceability", very_low=True)
 vp4.top10_genres_feature_ranking(database, "danceability", very_low=False)

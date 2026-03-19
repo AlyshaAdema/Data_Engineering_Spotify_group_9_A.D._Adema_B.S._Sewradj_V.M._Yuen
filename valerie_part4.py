@@ -77,10 +77,8 @@ def top10_genres_feature_ranking(database, feature, very_low=True):
 
     if very_low:
         low_df = df[df['feature_ranking'] == 'very low']
-        print(f"The top 10 most frequently occurring genres among tracks that score very low for {feature} are: ")
-        print(low_df['artist_genres'].value_counts().nlargest(10))
+        return low_df['artist_genres'].value_counts().nlargest(10)
     else:
         high_df = df[df['feature_ranking'] == 'very high']
-        print(f"The top 10 most frequently occurring genres among tracks that score very high for {feature} are: ")
-        print(high_df['artist_genres'].value_counts().nlargest(10))
+        return high_df['artist_genres'].value_counts().nlargest(10)
 
