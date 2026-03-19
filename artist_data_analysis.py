@@ -116,7 +116,6 @@ def popularity_artist(database, artist):
     df = pd.read_sql_query("SELECT artist_popularity FROM artist_data WHERE name = ?", database, params=(artist,))
     return df['artist_popularity'].mean()
 
-
 def genres_artist(database, artist):
     df = pd.read_sql_query("SELECT artist_genres FROM artist_data WHERE name = ?", database, params=(artist,))
     if df.empty:

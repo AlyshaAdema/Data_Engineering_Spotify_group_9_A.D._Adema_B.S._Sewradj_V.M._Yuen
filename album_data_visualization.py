@@ -187,3 +187,13 @@ def music_trends_over_time(database):
     plt.ylabel("Average Tempo")
     plt.show()
 
+def album_tracks(database, album_name, artist_name):
+    df = pd.read_sql_query("SELECT al.track_number, al.track_name, al.duration_sec FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?) ORDER BY al.track_number", database, params=(album_name, artist_name))
+    fig, ax = plt.subplots()
+    ax.bar(df["track_name"], df["duration_sec"]/60)
+    ax.set_title(f"Tracks on {album_name} by {artist_name}")
+    ax.set_xlabel("Track")
+    ax.set_ylabel("Duration (min)")
+    plt.xticks(rotation=45, ha="right")
+    plt.tight_layout()
+    return df, fig

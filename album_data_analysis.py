@@ -1,4 +1,9 @@
+import sqlite3
+import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+
+database = sqlite3.connect('spotify_database.db')
 
 def unique_albums(database, eras):
     eras_str = ','.join([f"'{era}'" for era in eras])
@@ -138,17 +143,69 @@ def artists_for_album(database, album_name):
 
 def album_duration(database, album_name, artist_name):
     df = pd.read_sql_query("SELECT SUM(duration_sec) AS album_duration_sec FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
-    return df["album_duration_sec"].iloc[0]/60
+    if df.empty or df["album_duration_sec"].iloc[0] is None:
+        return None
+    total_sec = df["album_duration_sec"].iloc[0]
+    minutes = int(total_sec // 60)
+    seconds = int(total_sec % 60)
+    return f"{minutes} min {seconds} sec"
 
 def label(database, album_name, artist_name):
     df = pd.read_sql_query("SELECT label AS label FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
+    if df.empty:
+        return None
     return df["label"].iloc[0]
 
 def total_tracks(database, album_name, artist_name):
     df = pd.read_sql_query("SELECT total_tracks AS total FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
+    if df.empty:
+        return None
     return df["total"].iloc[0]
 
 def release_date(database, album_name, artist_name):
     df = pd.read_sql_query("SELECT release_date FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
     df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
+    if df.empty:
+        return None
     return df["release_date"].dt.date.iloc[0]
+
+def album_feature(database, album_name, artist_name, feature):
+    df = pd.read_sql_query(f"SELECT al.track_number, al.track_name, ft.{feature} FROM albums_data al JOIN features_data ft ON al.track_id = ft.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(al.artist_0) = LOWER(?) ORDER BY al.track_number", database, params=(album_name, artist_name))
+    if df.empty:
+        return None
+    return df
+
+def plot_album_feature(df, album_name, artist_name, feature):
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.plot(df["track_number"], df[feature], marker='o')
+    ax.set_title(f"{feature} across {album_name} by {artist_name}")
+    ax.set_xlabel("Track number")
+    ax.set_ylabel(feature)
+    ax.set_xticks(df["track_number"])
+    ax.set_xticklabels(df["track_number"])
+    plt.tight_layout()
+    return fig
+
+def album_featured_artist_counts(database, album_name, artist_name):
+    df = pd.read_sql_query("SELECT artist_1, artist_2, artist_3, artist_4, artist_5, artist_6 FROM albums_data WHERE LOWER(album_name) = LOWER(?) AND LOWER(artist_0) = LOWER(?)", database, params=(album_name, artist_name))
+    if df.empty:
+        return pd.DataFrame(columns=["artist", "count"])
+    feature_cols = ["artist_1", "artist_2", "artist_3", "artist_4", "artist_5", "artist_6"]
+    all_artists = pd.concat([df[col] for col in feature_cols])
+    all_artists = all_artists.dropna()
+    all_artists = all_artists[all_artists.str.strip() != ""]
+    if all_artists.empty:
+        return pd.DataFrame(columns=["artist", "count"])
+    result = all_artists.value_counts().reset_index()
+    result.columns = ["artist", "count"]
+    return result
+
+def plot_featured_artist_counts(df, album_name, artist_name):
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.barh(df["artist"], df["count"])
+    ax.set_title(f"Featured artists on {album_name} by {artist_name}")
+    ax.set_xlabel("Number of tracks")
+    ax.set_ylabel("Artist")
+    ax.set_xticks(np.arange(0, df["count"].max() + 1, 1))
+    plt.tight_layout()
+    return fig
