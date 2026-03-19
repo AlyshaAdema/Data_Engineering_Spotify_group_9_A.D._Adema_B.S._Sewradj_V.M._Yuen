@@ -18,7 +18,7 @@ st.set_page_config(
 )
 
 database = sqlite3.connect('spotify_database.db')
-page = st.sidebar.radio('Navigation', ['Opening page', 'Features', 'Genres', 'Artist', 'Album'])
+page = st.sidebar.radio('Navigation', ['Opening page', 'Feature', 'Genre', 'Artist', 'Album'])
 eras = ['1900s','1930s','1940s','1950s','1960s','1970s','1980s','1990s','2000s','2010s','2020s']
 features = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms']
 genres = arda.all_genres(database)
@@ -68,8 +68,8 @@ if page == 'Opening page':
         fig = fldv.pie_chart_explicit_vs_nonexplicit(database, selected_eras)
         st.pyplot(fig)
 
-elif page =='Features':
-    st.title("Features")
+elif page =='Feature':
+    st.title("Feature")
     selected_feature = st.sidebar.selectbox('Select a main Feature to display:', features)
     compare_feature_list = [feature for feature in features if feature != selected_feature]
     selected_eras = st.sidebar.multiselect('Select Era(s) to Display:', eras, default=eras)
@@ -130,22 +130,22 @@ elif page =='Features':
     st.divider()
 
     chart_type = st.selectbox("Select metric to display:", ("Artists", "Genres"))
-    #left, right = st.columns(2)
-    #with left:
-        #if chart_type == "Artists":
-            #fig =
-        #if chart_type == "Genres":
-            #fig =
-        #st.pyplot(fig)
-    #with right:
-        #if chart_type == "Artists":
-            #fig =
-        #if chart_type == "Genres":
-            #fig =
-        #st.pyplot(fig)
+    left, right = st.columns(2)
+    with left:
+        if chart_type == "Artists":
+            fig = fldv.bar_plot_top10_artist_feature_ranking(database, selected_feature, selected_eras, very_low=False)
+        if chart_type == "Genres":
+            fig = fldv.bar_plot_top10_genres_feature_ranking(database, selected_feature, selected_eras, very_low=False)
+        st.pyplot(fig)
+    with right:
+        if chart_type == "Artists":
+            fig = fldv.bar_plot_top10_artist_feature_ranking(database, selected_feature, selected_eras, very_low=True)
+        if chart_type == "Genres":
+            fig = fldv.bar_plot_top10_genres_feature_ranking(database, selected_feature, selected_eras, very_low=True)
+        st.pyplot(fig)
 
-elif page == 'Genres':
-    st.title('Genres')
+elif page == 'Genre':
+    st.title('Genre')
     selected_genre = st.sidebar.selectbox('Select a Genre to Display:', genres)
     total_artists = arda.artists_per_genre(database, selected_genre)
     average_popularity = arda.average_popularity_per_genre(database, selected_genre)

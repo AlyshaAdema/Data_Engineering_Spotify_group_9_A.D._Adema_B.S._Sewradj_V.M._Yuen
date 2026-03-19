@@ -104,8 +104,8 @@ def bar_plot_top10_genres_feature_ranking(database, feature, eras, very_low=True
         ax.set_title("No eras selected")
         return fig
     fig, ax = plt.subplots()
-    ax.bar(df['artist_genres'], df['count'])
-    ax.set_xticklabels(df['artist_genres'], rotation=90)
+    ax.bar(df['genres'], df['count'])
+    ax.set_xticklabels(df['genres'], rotation=90)
     ax.set_xlabel('Genre')
     ax.set_ylabel('Count')
     if very_low:
