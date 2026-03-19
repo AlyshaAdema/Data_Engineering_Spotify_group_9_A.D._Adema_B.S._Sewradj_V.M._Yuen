@@ -175,7 +175,6 @@ def music_trends_over_time(database):
     df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce')
     df['year'] = df['release_date'].dt.year
     trend = df.groupby('year')[['danceability', 'energy', 'valence', 'tempo']].mean()
-
     trend[['danceability', 'energy', 'valence']].plot(figsize=(10, 6))
     plt.title("Danceability, Energy, and Valence Over Time")
     plt.xlabel("Year")

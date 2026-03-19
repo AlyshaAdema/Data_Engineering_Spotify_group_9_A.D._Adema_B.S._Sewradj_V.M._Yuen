@@ -173,6 +173,7 @@ def album_feature(database, album_name, artist_name, feature):
     df = pd.read_sql_query(f"SELECT al.track_number, al.track_name, ft.{feature} FROM albums_data al JOIN features_data ft ON al.track_id = ft.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(al.artist_0) = LOWER(?) ORDER BY al.track_number", database, params=(album_name, artist_name))
     if df.empty:
         return None
+    df = df.drop_duplicates(subset=["track_number"])
     return df
 
 def plot_album_feature(df, album_name, artist_name, feature):
