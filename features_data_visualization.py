@@ -112,3 +112,50 @@ def outliers(database):
         plt.title(col)
     plt.tight_layout()
     plt.show()
+
+def line_chart_features_eras(database, feature, eras):
+    if not eras:
+        fig, ax = plt.subplots()
+        ax.set_title("No eras selected")
+        return fig
+    eras_str = ','.join([f"'{era}'" for era in eras])
+    df = pd.read_sql_query(f"SELECT f.{feature}, al.era FROM features_data f JOIN albums_data al ON f.id = al.track_id WHERE al.era IN ({eras_str})", database)
+    average = []
+    for era in eras:
+        average_popularity = df[df['era'] == era][feature].mean()
+        average.append(average_popularity)
+    fig, ax = plt.subplots()
+    ax.plot(eras, average)
+    ax.set_xlabel('Era')
+    ax.set_ylabel(f'Average {feature} score')
+    ax.set_title(f'Average {feature} score by era')
+    plt.xticks(rotation=90)
+    return fig
+
+def boxplot_feature(database, feature, eras):
+    eras_str = ','.join([f"'{era}'" for era in eras])
+    df = pd.read_sql_query(f"SELECT f.{feature} FROM features_data f JOIN albums_data al ON al.track_id = f.id WHERE al.era IN ({eras_str})", database)
+    if df is None or df.empty:
+        fig, ax = plt.subplots()
+        ax.set_title("No eras selected")
+        return fig
+    fig, ax = plt.subplots()
+    ax.boxplot(df[feature], vert=False)
+    ax.set_yticks([])
+    ax.set_xlabel("Values")
+    ax.set_title(f"Boxplot of {feature}")
+    return fig
+
+def scatterplot_features(database, feature1, feature2, eras):
+    eras_str = ','.join([f"'{era}'" for era in eras])
+    df = pd.read_sql_query(f"SELECT f.{feature1}, f.{feature2} FROM features_data f JOIN albums_data al ON al.track_id = f.id WHERE al.era IN ({eras_str})", database)
+    if df is None or df.empty:
+        fig, ax = plt.subplots()
+        ax.set_title("No eras selected")
+        return fig
+    fig, ax = plt.subplots()
+    ax.scatter(df[feature1], df[feature2])
+    ax.set_xlabel(f"{feature1} score")
+    ax.set_ylabel(f"{feature2} score")
+    ax.set_title(f"Scatterplot of {feature1} vs {feature2}")
+    return fig

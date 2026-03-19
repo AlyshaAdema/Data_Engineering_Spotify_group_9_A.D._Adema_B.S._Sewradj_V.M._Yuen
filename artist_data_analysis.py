@@ -8,6 +8,13 @@ def unique_artists(database, eras):
     df = pd.read_sql_query(f"SELECT ar.id, al.era FROM artist_data ar JOIN albums_data al ON ar.id = al.artist_id WHERE al.era IN ({eras_str})", database)
     return df['id'].nunique()
 
+def number_of_genres(database, eras):
+    eras_str = ','.join([f"'{era}'" for era in eras])
+    df = pd.read_sql_query(f"SELECT ar.artist_genres, al.era FROM artist_data ar JOIN albums_data al ON ar.id = al.artist_id WHERE al.era IN ({eras_str})", database)
+    df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
+    genres = df['artist_genres'].explode().dropna()
+    return genres.nunique()
+
 def correlation_followers_popularity(database):
     df = pd.read_sql_query("SELECT followers, artist_popularity FROM artist_data", database)
     return df['followers'].corr(df['artist_popularity'])
@@ -45,15 +52,23 @@ def find_over_performers(database):
     df['residual'] = df['artist_popularity'] - df['predicted_popularity']
     return df.nlargest(10, 'residual')['name']
 
+def all_genres(database):
+    df = pd.read_sql_query("SELECT artist_genres FROM artist_data", database)
+    df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
+    df = df['artist_genres'].explode().dropna()
+    return sorted(df.unique())
+
 def top10_followers_artists_genre(database, genre):
     df = pd.read_sql_query("SELECT name, followers, artist_genres FROM artist_data", database)
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
-    return df[df['artist_genres'].apply(lambda x: genre in x)].nlargest(10, 'followers')['name']
+    df = df[df['artist_genres'].apply(lambda x: genre in x)]
+    return df.nlargest(10, 'followers')[['name', 'followers']]
 
 def top10_popularity_artists_genre(database, genre):
     df = pd.read_sql_query("SELECT name, artist_popularity, artist_genres FROM artist_data", database)
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
-    return df[df['artist_genres'].apply(lambda x: genre in x)].nlargest(10, 'artist_popularity')['name']
+    df = df[df['artist_genres'].apply(lambda x: genre in x)]
+    return df.nlargest(10, 'artist_popularity')[['name', 'artist_popularity']]
 
 def artists_per_genre(database, genre):
     df = pd.read_sql_query("SELECT artist_genres FROM artist_data", database)
@@ -63,17 +78,20 @@ def artists_per_genre(database, genre):
 def total_followers_per_genre(database, genre):
     df = pd.read_sql_query("SELECT followers, artist_genres FROM artist_data", database)
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
-    return df[df['artist_genres'].apply(lambda x: genre in x)].sum()
+    df = df[df['artist_genres'].apply(lambda x: genre in x)]
+    return df['followers'].sum()
 
 def average_followers_per_genre(database, genre):
     df = pd.read_sql_query("SELECT followers, artist_genres FROM artist_data", database)
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
-    return int(df[df['artist_genres'].apply(lambda x: genre in x)].mean() + 0.5)
+    df = df[df['artist_genres'].apply(lambda x: genre in x)]
+    return int(df['followers'].mean() + 0.5)
 
 def average_popularity_per_genre(database, genre):
     df = pd.read_sql_query("SELECT artist_popularity, artist_genres FROM artist_data", database)
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
-    return int(df[df['artist_genres'].apply(lambda x: genre in x)].mean() + 0.5)
+    df = df[df['artist_genres'].apply(lambda x: genre in x)]
+    return int(df['artist_popularity'].mean() + 0.5)
 
 def artists_per_popularity_rating(database, popularity):
     df = pd.read_sql_query("SELECT artist_popularity FROM arist_data", database)
@@ -96,13 +114,11 @@ def df_followers_all_genres(database, eras):
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
     clean_exploded_df = df.explode('artist_genres').dropna()
     genres_df = pd.DataFrame(columns=['genre', 'followers'])
-
     for genre in clean_exploded_df['artist_genres'].unique():
         total_followers = clean_exploded_df[
             clean_exploded_df['artist_genres'] == genre
             ]['followers'].sum()
         genres_df.loc[len(genres_df)] = [genre, total_followers]
-
     return genres_df
 
 def top10_genres_by_most_or_least_followers(database, eras, most_followers=True):
@@ -116,10 +132,20 @@ def popularity_artist(database, artist):
     df = pd.read_sql_query("SELECT artist_popularity FROM artist_data WHERE name = ?", database, params=(artist,))
     return df['artist_popularity'].mean()
 
-
 def genres_artist(database, artist):
     df = pd.read_sql_query("SELECT artist_genres FROM artist_data WHERE name = ?", database, params=(artist,))
     if df.empty:
         return []
     df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
     return df['artist_genres'].iloc[0]
+
+def most_frequent_combination_genre(database, genre):
+    df = pd.read_sql_query("SELECT artist_genres FROM artist_data", database)
+    df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
+    df = df[df['artist_genres'].apply(lambda x: genre in x)]
+    exploded_df = df.explode('artist_genres')
+    exploded_df = exploded_df[exploded_df['artist_genres'] != genre]
+    count = exploded_df['artist_genres'].value_counts().head(10)
+    result_df = count.reset_index()
+    result_df.columns = ['genre', 'count']
+    return result_df
