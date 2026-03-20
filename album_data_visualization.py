@@ -1,9 +1,6 @@
-import sqlite3
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-
-database = sqlite3.connect('spotify_database.db')
 
 def album_duration_vs_popularity(database):
     df = pd.read_sql_query("SELECT album_id, SUM(duration_sec) AS album_duration_sec, MAX(album_popularity) AS album_popularity FROM albums_data GROUP BY album_id",database)
