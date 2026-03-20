@@ -7,7 +7,7 @@ import full_database_analysis as fda
 def line_chart_track_popularity(database, eras):
     if not eras:
         fig, ax = plt.subplots()
-        ax.set_title("No eras selected")
+        ax.set_title("No Eras Selected")
         return fig
     eras_str = ','.join([f"'{era}'" for era in eras])
     df = pd.read_sql_query(f"SELECT t.track_popularity, al.era FROM tracks_data t JOIN albums_data al ON t.id = al.track_id WHERE al.era IN ({eras_str})", database)
@@ -45,7 +45,7 @@ def donut_chart_tracks(database, eras):
 def donut_chart_explicit_vs_nonexplicit(database, eras):
     if not eras:
         fig, ax = plt.subplots()
-        ax.set_title("No eras selected")
+        ax.set_title("No Eras Selected")
         return fig
     eras_str = ','.join([f"'{era}'" for era in eras])
     df = pd.read_sql_query(f"SELECT t.explicit, t.track_popularity FROM tracks_data t JOIN albums_data al ON t.id = al.track_id WHERE era IN ({eras_str})", database)
@@ -70,7 +70,7 @@ def bar_plot_top_5_tracks_artist(database, artist):
     ax.bar(df['track_name'], df['track_popularity'])
     ax.set_xticks(range(len(df)))
     ax.set_xticklabels([name[:15] + "…" if len(name) > 15 else name for name in df['track_name']], rotation=45, ha='right')
-    ax.set_xlabel('Names top tracks')
+    ax.set_xlabel('Top Tracks')
     ax.set_ylabel('Popularity')
     ax.set_title('Popularity Top Tracks')
     plt.tight_layout()
@@ -86,7 +86,7 @@ def bar_plot_top_5_albums(database, artist):
     ax.bar(df['album_name'], df['album_popularity'])
     ax.set_xticks(range(len(df)))
     ax.set_xticklabels([name[:15] + "…" if len(name) > 15 else name for name in df['album_name']], rotation=45, ha='right')
-    ax.set_xlabel('Names top albums')
+    ax.set_xlabel('Top Albums')
     ax.set_ylabel('Popularity')
     ax.set_title('Popularity Top Albums')
     plt.tight_layout()
@@ -102,6 +102,6 @@ def box_plot_feature_artist(database, artist, feature):
     ax.boxplot(df[feature], vert=False)
     ax.set_yticks([])
     ax.set_xlabel("Values")
-    ax.set_title(f"Boxplot of {feature}")
+    ax.set_title(f"Boxplot of {feature.title()}")
     return fig
 

@@ -116,7 +116,7 @@ def outliers(database):
 def line_chart_features_eras(database, feature, eras):
     if not eras:
         fig, ax = plt.subplots()
-        ax.set_title("No eras selected")
+        ax.set_title("No Eras Selected")
         return fig
     eras_str = ','.join([f"'{era}'" for era in eras])
     df = pd.read_sql_query(f"SELECT f.{feature}, al.era FROM features_data f JOIN albums_data al ON f.id = al.track_id WHERE al.era IN ({eras_str})", database)
@@ -127,8 +127,8 @@ def line_chart_features_eras(database, feature, eras):
     fig, ax = plt.subplots()
     ax.plot(eras, average)
     ax.set_xlabel('Era')
-    ax.set_ylabel(f'Average {feature} score')
-    ax.set_title(f'Average {feature} score by era')
+    ax.set_ylabel(f'Average {feature.title()} Score')
+    ax.set_title(f'Average {feature.title()} Score by Era')
     plt.xticks(rotation=90)
     return fig
 
@@ -137,13 +137,13 @@ def boxplot_feature(database, feature, eras):
     df = pd.read_sql_query(f"SELECT f.{feature} FROM features_data f JOIN albums_data al ON al.track_id = f.id WHERE al.era IN ({eras_str})", database)
     if df is None or df.empty:
         fig, ax = plt.subplots()
-        ax.set_title("No eras selected")
+        ax.set_title("No Eras Selected")
         return fig
     fig, ax = plt.subplots()
     ax.boxplot(df[feature], vert=False)
     ax.set_yticks([])
     ax.set_xlabel("Values")
-    ax.set_title(f"Boxplot of {feature}")
+    ax.set_title(f"Boxplot of {feature.title()}")
     return fig
 
 def scatterplot_features(database, feature1, feature2, eras):
@@ -151,7 +151,7 @@ def scatterplot_features(database, feature1, feature2, eras):
     df = pd.read_sql_query(f"SELECT f.{feature1}, f.{feature2} FROM features_data f JOIN albums_data al ON al.track_id = f.id WHERE al.era IN ({eras_str})", database)
     if df is None or df.empty:
         fig, ax = plt.subplots()
-        ax.set_title("No eras selected")
+        ax.set_title("No Eras Selected")
         return fig
     fig, ax = plt.subplots()
     ax.scatter(df[feature1], df[feature2])
