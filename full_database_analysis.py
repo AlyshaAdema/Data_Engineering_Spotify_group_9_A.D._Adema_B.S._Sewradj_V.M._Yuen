@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import ast
 
 def album_features(database, album_id, feature, visualization=False):
     allowed_features = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms']
@@ -157,9 +158,52 @@ def artist_features(database, artist, feature, stat):
     df = pd.read_sql_query(f"SELECT al.track_id, al.album_id, f.{feature} FROM albums_data al JOIN features_data f ON al.track_id = f.id JOIN artist_data ar ON al.artist_id = ar.id WHERE ar.name = ?", database, params=[artist])
     if stat == 'mean':
         return df[feature].mean()
-    if stat == 'max':
+    elif stat == 'max':
         return df[feature].max()
-    if stat == 'min':
+    elif stat == 'min':
         return df[feature].min()
-    if stat == 'std':
+    elif stat == 'std':
         return df[feature].std()
+
+def top10_genres_feature_ranking(database, feature, eras, very_low=True):
+    eras_str = ','.join([f"'{era}'" for era in eras])
+    df = pd.read_sql_query(f"""SELECT f.{feature}, ar.artist_genres FROM features_data f JOIN albums_data al ON al.track_id = f.id JOIN artist_data ar ON ar.id = al.artist_id WHERE al.era IN ({eras_str})""", database)
+    df['feature_ranking'] = pd.cut(df[feature], 5, labels=['very low', 'low', 'medium', 'high', 'very high'])
+
+    df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
+    df = df.explode(column=['artist_genres']).dropna(subset=['artist_genres'])
+
+    if very_low:
+        low_df = df[df['feature_ranking'] == 'very low']
+        genres_list = low_df['artist_genres'].value_counts().keys().tolist()
+        count_list = low_df['artist_genres'].value_counts().tolist()
+        new_low_df = pd.DataFrame(columns=['genres', 'count'], data={'genres': genres_list, 'count': count_list})
+        return new_low_df.head(10)
+    else:
+        high_df = df[df['feature_ranking'] == 'very high']
+        genres_list = high_df['artist_genres'].value_counts().keys().tolist()
+        count_list = high_df['artist_genres'].value_counts().tolist()
+        new_high_df = pd.DataFrame(columns=['genres', 'count'], data={'genres': genres_list, 'count': count_list})
+        return new_high_df.head(10)
+
+def top10_artists_feature_ranking(database, feature, eras, very_low=True):
+    eras_str = ','.join([f"'{era}'" for era in eras])
+    artist_cols = [f'artist_{i}' for i in range(7)]
+    df = pd.read_sql_query(f"""SELECT f.{feature}, {", ".join("al."+c for c in artist_cols)} FROM features_data f JOIN albums_data al ON al.track_id = f.id JOIN artist_data ar ON ar.id = al.artist_id WHERE al.era IN ({eras_str})""", database)
+    df["artist_list"] = df[artist_cols].apply(lambda row: [a for a in row.dropna() if a != ''], axis=1)
+    df['feature_ranking'] = pd.cut(df[feature], 5, labels=['very low', 'low', 'medium', 'high', 'very high'])
+
+    df = df.explode(column=['artist_list']).dropna(subset=['artist_list'])
+
+    if very_low:
+        low_df = df[df['feature_ranking'] == 'very low']
+        artist_list = low_df['artist_list'].value_counts().keys().tolist()
+        count_list = low_df['artist_list'].value_counts().tolist()
+        new_low_df = pd.DataFrame(columns=['artist', 'count'], data={'artist': artist_list, 'count': count_list})
+        return new_low_df.head(10)
+    else:
+        high_df = df[df['feature_ranking'] == 'very high']
+        artist_list = high_df['artist_list'].value_counts().keys().tolist()
+        count_list = high_df['artist_list'].value_counts().tolist()
+        new_high_df = pd.DataFrame(columns=['artist', 'count'], data={'artist': artist_list, 'count': count_list})
+        return new_high_df.head(10)
