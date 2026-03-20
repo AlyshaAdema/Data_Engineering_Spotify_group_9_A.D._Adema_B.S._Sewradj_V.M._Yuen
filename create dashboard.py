@@ -176,3 +176,16 @@ elif page == 'Album':
     df = alda.album_feature(database, name, selected_artist, selected_feature)
     fig = alda.plot_album_feature(df, name, selected_artist, selected_feature)
     st.pyplot(fig)
+
+    st.divider()
+
+    left, right = st.columns(2)
+    with left:
+        fig_explicit = alda.album_explicit_pie(database, name, selected_artist)
+        if fig_explicit is not None:
+            st.pyplot(fig_explicit)
+        else:
+            st.write("No explicit track data found for this album and artist.")
+    with right:
+        df_pop, fig_pop = aldv.album_track_popularity(database, name, selected_artist)
+        st.pyplot(fig_pop)

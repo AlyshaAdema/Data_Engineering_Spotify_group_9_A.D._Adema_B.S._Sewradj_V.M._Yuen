@@ -179,7 +179,7 @@ def album_feature(database, album_name, artist_name, feature):
 def plot_album_feature(df, album_name, artist_name, feature):
     fig, ax = plt.subplots(figsize=(10, 4))
     ax.plot(df["track_number"], df[feature], marker='o')
-    ax.set_title(f"{feature} across {album_name} by {artist_name}")
+    ax.set_title(f"{feature} across {album_name}")
     ax.set_xlabel("Track number")
     ax.set_ylabel(feature)
     ax.set_xticks(df["track_number"])
@@ -204,9 +204,20 @@ def album_featured_artist_counts(database, album_name, artist_name):
 def plot_featured_artist_counts(df, album_name, artist_name):
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.barh(df["artist"], df["count"])
-    ax.set_title(f"Featured artists on {album_name} by {artist_name}")
+    ax.set_title(f"Featured artists on {album_name}")
     ax.set_xlabel("Number of tracks")
     ax.set_ylabel("Artist")
     ax.set_xticks(np.arange(0, df["count"].max() + 1, 1))
     plt.tight_layout()
+    return fig
+
+def album_explicit_pie(database, album_name, artist_name):
+    df = pd.read_sql_query("SELECT a.track_id, a.track_name, t.explicit FROM albums_data a JOIN tracks_data t ON a.track_id = t.id WHERE LOWER(a.album_name) = LOWER(?) AND LOWER(a.artist_0) = LOWER(?)",database, params=[album_name, artist_name])
+    if df.empty:
+        return None
+    explicit_tracks = len(df[df["explicit"] == "true"])
+    non_explicit_tracks = len(df[df["explicit"] == "false"])
+    fig, ax = plt.subplots()
+    ax.pie([explicit_tracks, non_explicit_tracks], labels=["Explicit", "Non-explicit"], autopct="%1.1f%%")
+    ax.set_title(f"Explicit vs non-explicit on {album_name}")
     return fig
