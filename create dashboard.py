@@ -1,7 +1,7 @@
 import streamlit as st
 import sqlite3
 
-# importing own files
+# Importing own files
 import artist_data_analysis as arda
 import artist_data_visualization as ardv
 import album_data_analysis as alda
@@ -17,14 +17,18 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Connect to database
 database = sqlite3.connect('spotify_database.db')
-page = st.sidebar.radio('Navigation', ['Opening page', 'Features', 'Genres', 'Artist', 'Album'])
+
+# Pages and selections
+page = st.sidebar.radio('Navigation', ['Home', 'Album', 'Artist', 'Feature', 'Genre'])
 eras = ['1900s','1930s','1940s','1950s','1960s','1970s','1980s','1990s','2000s','2010s','2020s']
-features = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms']
+features = ['acousticness', 'danceability', 'duration_ms', 'energy', 'instrumentalness', 'liveness', 'loudness', 'speechiness', 'tempo', 'valence']
 genres = arda.all_genres(database)
 
-if page == 'Opening page':
-    st.title("Opening page")
+# ---------- HOME PAGE ----------
+if page == 'Home':
+    st.title("Home page")
     selected_eras = st.sidebar.multiselect('Select Era(s) to Display:', eras, default=eras)
     total_artists = arda.unique_artists(database, selected_eras)
     total_albums = alda.unique_albums(database, selected_eras)
@@ -68,7 +72,8 @@ if page == 'Opening page':
         fig = fldv.donut_chart_explicit_vs_nonexplicit(database, selected_eras)
         st.pyplot(fig)
 
-elif page =='Features':
+# ---------- FEATURES PAGE ----------
+elif page =='Feature':
     st.title("Features")
     selected_feature = st.sidebar.selectbox('Select a main Feature to display:', features)
     compare_feature_list = [feature for feature in features if feature != selected_feature]
@@ -126,7 +131,8 @@ elif page =='Features':
     with col5:
         st.metric(f"Correlation {compare_feature_list[8]} ", f"{correlation_feature8:,.2f}")
 
-elif page == 'Genres':
+# ---------- GENRES PAGE ----------
+elif page == 'Genre':
     st.title('Genres')
     selected_genre = st.sidebar.selectbox('Select a Genre to Display:', genres)
     total_artists = arda.artists_per_genre(database, selected_genre)
@@ -165,6 +171,7 @@ elif page == 'Genres':
     fig = ardv.bar_plot_top_genre_combination(database, selected_genre)
     st.pyplot(fig)
 
+# ---------- ARTIST PAGE ----------
 elif page == 'Artist':
     st.title("Artists")
     name = st.sidebar.text_input('Enter an artist name', 'Taylor Swift')
@@ -223,6 +230,7 @@ elif page == 'Artist':
         fig = fldv.box_plot_feature_artist(database, name, feature)
         st.pyplot(fig)
 
+# ---------- ALBUM PAGE ----------
 elif page == 'Album':
     st.title("Albums")
     name = st.sidebar.text_input('Enter an album name', 'reputation')
