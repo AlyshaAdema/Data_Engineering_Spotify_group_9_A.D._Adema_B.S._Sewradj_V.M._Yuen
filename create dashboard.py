@@ -5,10 +5,9 @@ import sqlite3
 import artist_data_analysis as arda
 import artist_data_visualization as ardv
 import album_data_analysis as alda
-import full_database_analysis as flda
-import full_database_visualization as fldv
-import features_data_analysis as fda
-import features_data_visualization as fdv
+import album_data_visualization as aldv
+import full_database_analysis as fda
+import full_database_visualization as fdv
 
 st.set_page_config(
     page_title="Opening page",
@@ -226,3 +225,60 @@ elif page == 'Artist':
 elif page == 'Album':
     st.title("Albums")
     name = st.sidebar.text_input('Enter an album name', 'reputation')
+    matching_artists = alda.artists_for_album(database, name)
+    if not matching_artists:
+        st.warning("No album found with that name.")
+        st.stop()
+    selected_artist = st.sidebar.selectbox('Select the artist:', matching_artists)
+    album_duration = alda.album_duration(database, name, selected_artist)
+    label = alda.label(database, name, selected_artist)
+    total_tracks = alda.total_tracks(database, name, selected_artist)
+    release_date = alda.release_date(database, name, selected_artist)
+    tracks,fig = aldv.album_tracks(database, name, selected_artist)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Album", name)
+    with col2:
+        st.metric("Label", label)
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric( "Artist", selected_artist)
+    with col2:
+        st.metric("Album Duration", album_duration)
+    with col3:
+        st.metric("Total Tracks", total_tracks)
+    with col4:
+        st.metric("Release Date", release_date.strftime("%d-%m-%Y"))
+
+    st.divider()
+
+    left, right = st.columns([1, 1])
+    with left:
+        st.pyplot(fig)
+    with right:
+        df_pop, fig_pop = aldv.album_track_popularity(database, name, selected_artist)
+        st.pyplot(fig_pop)
+
+    st.divider()
+
+    selected_feature = st.selectbox("Choose a feature", features)
+    df = alda.album_feature(database, name, selected_artist, selected_feature)
+    fig = alda.plot_album_feature(df, name, selected_artist, selected_feature)
+    st.pyplot(fig)
+
+    st.divider()
+
+    left, right = st.columns(2)
+    with left:
+        featured_df = alda.album_featured_artist_counts(database, name, selected_artist)
+        if not featured_df.empty:
+            fig_featured = alda.plot_featured_artist_counts(featured_df, name, selected_artist)
+            st.pyplot(fig_featured)
+        else:
+            st.write("No featured artists on this album.")
+    with right:
+        fig_explicit = alda.album_explicit_pie(database, name, selected_artist)
+        if fig_explicit is not None:
+            st.pyplot(fig_explicit)
+        else:
+            st.write("No explicit track data found for this album and artist.")
