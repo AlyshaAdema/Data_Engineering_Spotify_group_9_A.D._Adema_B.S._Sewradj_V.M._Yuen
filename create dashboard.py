@@ -163,12 +163,8 @@ elif page == 'Album':
     with left:
         st.pyplot(fig)
     with right:
-        featured_df = alda.album_featured_artist_counts(database, name, selected_artist)
-        if not featured_df.empty:
-            fig_featured = alda.plot_featured_artist_counts(featured_df, name, selected_artist)
-            st.pyplot(fig_featured)
-        else:
-            st.write("No featured artists on this album.")
+        df_pop, fig_pop = aldv.album_track_popularity(database, name, selected_artist)
+        st.pyplot(fig_pop)
 
     st.divider()
 
@@ -181,11 +177,15 @@ elif page == 'Album':
 
     left, right = st.columns(2)
     with left:
+        featured_df = alda.album_featured_artist_counts(database, name, selected_artist)
+        if not featured_df.empty:
+            fig_featured = alda.plot_featured_artist_counts(featured_df, name, selected_artist)
+            st.pyplot(fig_featured)
+        else:
+            st.write("No featured artists on this album.")
+    with right:
         fig_explicit = alda.album_explicit_pie(database, name, selected_artist)
         if fig_explicit is not None:
             st.pyplot(fig_explicit)
         else:
             st.write("No explicit track data found for this album and artist.")
-    with right:
-        df_pop, fig_pop = aldv.album_track_popularity(database, name, selected_artist)
-        st.pyplot(fig_pop)

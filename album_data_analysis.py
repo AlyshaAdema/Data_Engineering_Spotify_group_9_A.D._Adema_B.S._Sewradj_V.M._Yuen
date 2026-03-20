@@ -217,7 +217,14 @@ def album_explicit_pie(database, album_name, artist_name):
         return None
     explicit_tracks = len(df[df["explicit"] == "true"])
     non_explicit_tracks = len(df[df["explicit"] == "false"])
-    fig, ax = plt.subplots()
-    ax.pie([explicit_tracks, non_explicit_tracks], labels=["Explicit", "Non-explicit"], autopct="%1.1f%%")
+    fig, ax = plt.subplots(figsize=(4, 2))
+    ax.pie([explicit_tracks, non_explicit_tracks], autopct="%1.1f%%", pctdistance=0.7, startangle=90)
+    centre_circle = plt.Circle((0, 0), 0.5, fc="w")
+    fig.gca().add_artist(centre_circle)
     ax.set_title(f"Explicit vs non-explicit on {album_name}")
+    ax.legend(
+        ["Explicit", "Non-explicit"],
+        loc="upper left",
+        bbox_to_anchor=(1.05, 1)
+    )
     return fig
