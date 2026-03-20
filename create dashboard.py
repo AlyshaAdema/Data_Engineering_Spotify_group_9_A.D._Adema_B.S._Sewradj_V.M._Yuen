@@ -62,10 +62,10 @@ if page == 'Opening page':
 
     left, right = st.columns(2)
     with left:
-        fig = fldv.pie_chart_tracks(database, selected_eras)
+        fig = fldv.donut_chart_tracks(database, selected_eras)
         st.pyplot(fig)
     with right:
-        fig = fldv.pie_chart_explicit_vs_nonexplicit(database, selected_eras)
+        fig = fldv.donut_chart_explicit_vs_nonexplicit(database, selected_eras)
         st.pyplot(fig)
 
 elif page =='Features':

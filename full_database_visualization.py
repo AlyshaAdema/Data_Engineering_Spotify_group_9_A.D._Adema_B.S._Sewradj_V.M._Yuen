@@ -23,22 +23,26 @@ def line_chart_track_popularity(database, eras):
     plt.xticks(rotation=90)
     return fig
 
-def pie_chart_tracks(database, eras):
+def donut_chart_tracks(database, eras):
     if not eras:
         fig, ax = plt.subplots()
-        ax.set_title("No eras selected")
+        ax.set_title("No Eras Selected")
         return fig
     eras_str = ','.join([f"'{era}'" for era in eras])
     df = pd.read_sql_query(f"SELECT era FROM albums_data WHERE era IN ({eras_str})", database)
     tracks_released = []
     for era in eras:
         tracks_released.append(len(df[df['era'] == era]))
-    fig, ax = plt.subplots()
-    ax.pie(tracks_released, labels=eras, autopct='%1.1f%%')
-    ax.set_title('Tracks released per era')
+    fig, ax = plt.subplots(figsize=(8,5))
+    ax.pie(tracks_released, autopct='%1.1f%%', pctdistance=0.7, startangle=90)
+    centre_circle = plt.Circle((0, 0), 0.5, color='w')
+    ax.add_artist(centre_circle)
+    ax.set_title('Tracks Released per Era')
+    ax.legend(eras, loc="upper right", bbox_to_anchor=(1, 0.5))
+    fig.subplots_adjust(right=0.75)
     return fig
 
-def pie_chart_explicit_vs_nonexplicit(database, eras):
+def donut_chart_explicit_vs_nonexplicit(database, eras):
     if not eras:
         fig, ax = plt.subplots()
         ax.set_title("No eras selected")
@@ -47,9 +51,13 @@ def pie_chart_explicit_vs_nonexplicit(database, eras):
     df = pd.read_sql_query(f"SELECT t.explicit, t.track_popularity FROM tracks_data t JOIN albums_data al ON t.id = al.track_id WHERE era IN ({eras_str})", database)
     explicit_tracks = len(df[df['explicit'] == 'true'])
     non_explicit_tracks = len(df[df['explicit'] == 'false'])
-    fig, ax = plt.subplots()
-    ax.pie([explicit_tracks, non_explicit_tracks], labels=['Explicit', 'Non Explicit'], autopct='%1.1f%%')
-    ax.set_title('Explicit tracks vs non explicit')
+    fig, ax = plt.subplots(figsize=(8,5))
+    ax.pie([explicit_tracks, non_explicit_tracks], autopct='%1.1f%%', pctdistance=0.7, startangle=90)
+    centre_circle = plt.Circle((0, 0), 0.5, color='w')
+    ax.add_artist(centre_circle)
+    ax.set_title('Explicit vs Non-explicit Tracks')
+    ax.legend(['Explicit', 'Non-explicit'], loc="upper right", bbox_to_anchor=(1, 0.5))
+    fig.subplots_adjust(right=0.75)
     return fig
 
 def bar_plot_top_5_tracks_artist(database, artist):
@@ -64,7 +72,7 @@ def bar_plot_top_5_tracks_artist(database, artist):
     ax.set_xticklabels([name[:15] + "…" if len(name) > 15 else name for name in df['track_name']], rotation=45, ha='right')
     ax.set_xlabel('Names top tracks')
     ax.set_ylabel('Popularity')
-    ax.set_title('Popularity top tracks')
+    ax.set_title('Popularity Top Tracks')
     plt.tight_layout()
     return fig
 
@@ -80,7 +88,7 @@ def bar_plot_top_5_albums(database, artist):
     ax.set_xticklabels([name[:15] + "…" if len(name) > 15 else name for name in df['album_name']], rotation=45, ha='right')
     ax.set_xlabel('Names top albums')
     ax.set_ylabel('Popularity')
-    ax.set_title('Popularity top albums')
+    ax.set_title('Popularity Top Albums')
     plt.tight_layout()
     return fig
 
@@ -96,3 +104,4 @@ def box_plot_feature_artist(database, artist, feature):
     ax.set_xlabel("Values")
     ax.set_title(f"Boxplot of {feature}")
     return fig
+

@@ -18,7 +18,7 @@ def top10_followers(database, eras):
     ax.set_xticklabels(top10_followers['name'], rotation=90)
     ax.set_xlabel('Names artists')
     ax.set_ylabel('Followers')
-    ax.set_title('Amount of followers top 10 artists')
+    ax.set_title('Amount of Followers Top 10 Artists')
     plt.tight_layout()
     return fig
 
@@ -35,7 +35,7 @@ def top10_popularity(database, eras):
     ax.set_xticklabels(top10_popularity['name'], rotation=90)
     ax.set_xlabel('Names artists')
     ax.set_ylabel('Artist Popularity')
-    ax.set_title('Popularity top 10 artists')
+    ax.set_title('Popularity Top 10 Artists')
     plt.tight_layout()
     return fig
 
@@ -46,7 +46,7 @@ def top10_followers_genre(database, genre):
     ax.set_xticklabels(df['name'], rotation=90)
     ax.set_xlabel('Names top artists')
     ax.set_ylabel('Followers')
-    ax.set_title(f'Amount of followers top artists {genre}')
+    ax.set_title(f'Amount of Followers Top Artists {genre}')
     plt.tight_layout()
     return fig
 
@@ -57,7 +57,7 @@ def top10_popularity_genre(database, genre):
     ax.set_xticklabels(df['name'], rotation=90)
     ax.set_xlabel('Names top artists')
     ax.set_ylabel('Popularity')
-    ax.set_title(f'Popularity top artists {genre}')
+    ax.set_title(f'Popularity Top Artists {genre}')
     plt.tight_layout()
     return fig
 
@@ -99,7 +99,7 @@ def linear_regression(database, eras):
     ax.plot(sorted_followers, intercept + slope * np.log1p(sorted_followers), color='red')
     ax.set_xlabel('Amount of followers')
     ax.set_ylabel('Artist popularity')
-    ax.set_title('Scatter plot followers vs popularity')
+    ax.set_title('Scatterplot Followers vs Popularity')
     return fig
 
 def genres_histogram(database):
@@ -109,7 +109,7 @@ def genres_histogram(database):
     plt.hist(df['number_of_genres'], bins=range(0, 10, 1))
     plt.xlabel('Number of Genres')
     plt.ylabel('Frequency')
-    plt.title('Distribution genres')
+    plt.title('Distribution Genres')
     plt.show()
 
 def top10_genres(database, eras):
@@ -123,7 +123,7 @@ def top10_genres(database, eras):
     ax.set_xticklabels(top10_genres['genre'], rotation=90)
     ax.set_xlabel('Genres')
     ax.set_ylabel('Followers')
-    ax.set_title('Amount of followers top 10 genres')
+    ax.set_title('Amount of Followers Top 10 Genres')
     plt.tight_layout()
     return fig
 
@@ -134,6 +134,7 @@ def bar_plot_top_genre_combination(database, genre):
     ax.set_xticklabels(df['genre'], rotation=90)
     ax.set_xlabel('Genre')
     ax.set_ylabel('Appears together')
-    ax.set_title(f'Genres {genre} appears with most')
+    ax.set_title(f'Genres Most Often Paired with {genre}')
     plt.tight_layout()
     return fig
+
