@@ -204,8 +204,8 @@ def album_featured_artist_counts(database, album_name, artist_name):
 def plot_featured_artist_counts(df, album_name, artist_name):
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.barh(df["artist"], df["count"])
-    ax.set_title(f"Featured artists on {album_name}")
-    ax.set_xlabel("Number of tracks")
+    ax.set_title(f"Featured Artists on {album_name}")
+    ax.set_xlabel("Number of Tracks")
     ax.set_ylabel("Artist")
     ax.set_xticks(np.arange(0, df["count"].max() + 1, 1))
     plt.tight_layout()
@@ -221,7 +221,7 @@ def album_explicit_pie(database, album_name, artist_name):
     ax.pie([explicit_tracks, non_explicit_tracks], autopct="%1.1f%%", pctdistance=0.7, startangle=90)
     centre_circle = plt.Circle((0, 0), 0.5, fc="w")
     fig.gca().add_artist(centre_circle)
-    ax.set_title(f"Explicit vs non-explicit on {album_name}")
+    ax.set_title(f"Explicit vs Non-explicit on {album_name}")
     ax.legend(
         ["Explicit", "Non-explicit"],
         loc="upper left",

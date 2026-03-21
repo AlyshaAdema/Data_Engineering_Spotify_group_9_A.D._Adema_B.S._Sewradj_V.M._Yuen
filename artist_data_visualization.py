@@ -9,7 +9,7 @@ import artist_data_analysis as arda
 def top10_followers(database, eras):
     if not eras:
         fig, ax = plt.subplots()
-        ax.set_title("No eras selected")
+        ax.set_title("No Eras Selected")
         return fig
     eras_str = ','.join([f"'{era}'" for era in eras])
     df = pd.read_sql_query(f"SELECT ar.name, MAX(ar.followers) as followers FROM artist_data ar JOIN albums_data al ON ar.id = al.artist_id WHERE era IN ({eras_str}) GROUP BY ar.name", database)
@@ -37,7 +37,7 @@ def top10_followers(database, eras):
 def top10_popularity(database, eras):
     if not eras:
         fig, ax = plt.subplots()
-        ax.set_title("No eras selected")
+        ax.set_title("No Eras Selected")
         return fig
     eras_str = ','.join([f"'{era}'" for era in eras])
     df = pd.read_sql_query(f"SELECT ar.name, MAX(ar.artist_popularity) as artist_popularity FROM artist_data ar JOIN albums_data al ON ar.id = al.artist_id WHERE era IN ({eras_str}) GROUP BY ar.name", database)
@@ -56,7 +56,7 @@ def top10_popularity(database, eras):
     ax.bar(top10_popularity['name'], top10_popularity['artist_popularity'], color=colors)
     ax.set_xticklabels(top10_popularity['name'], rotation=90)
     ax.set_xlabel('Artists')
-    ax.set_ylabel('Popularity')
+    ax.set_ylabel('Artist Popularity')
     ax.set_title('Top Artists by Popularity', fontsize=16, weight='bold')
     ax.grid(axis='x', linestyle='', alpha=0.3, color='white')
     plt.tight_layout()
@@ -79,7 +79,7 @@ def top10_followers_genre(database, genre):
     ax.set_xticklabels([name[:15] + "…" if len(name) > 15 else name for name in df['name']], rotation=45, ha='right')
     ax.set_xlabel('Artists')
     ax.set_ylabel('Followers')
-    ax.set_title(f'Top {genre} Artists by Followers', fontsize=16, weight='bold')
+    ax.set_title(f'Top {genre.title()} Artists by Followers', fontsize=16, weight='bold')
     plt.tight_layout()
     return fig
 
@@ -100,7 +100,7 @@ def top10_popularity_genre(database, genre):
     ax.set_xticklabels([name[:15] + "…" if len(name) > 15 else name for name in df['name']], rotation=45, ha='right')
     ax.set_xlabel('Artists')
     ax.set_ylabel('Popularity')
-    ax.set_title(f'Top {genre} Artists by Popularity', fontsize=16, weight='bold')
+    ax.set_title(f'Top {genre.title()} Artists by Popularity', fontsize=16, weight='bold')
     plt.tight_layout()
     return fig
 
@@ -110,9 +110,9 @@ def followers_distribution_genres(database, genre):
     df = df[df['artist_genres'].apply(lambda x: genre in x)]
     fig, ax = plt.subplots()
     sns.histplot(data=np.log1p(df['followers']), kde=True, ax=ax)
-    ax.set_title(f"Followers Distribution for {genre}")
+    ax.set_title(f"Followers Distribution for {genre.title()}")
     ax.set_xlabel("Log(Followers + 1)")
-    ax.set_ylabel("Number of Artists")
+    ax.set_ylabel(f"Number of {genre.title()} Artists")
     plt.tight_layout()
     return fig
 
@@ -122,7 +122,7 @@ def popularity_distribution_genres(database, genre):
     df = df[df['artist_genres'].apply(lambda x: genre in x)]
     fig, ax = plt.subplots()
     sns.histplot(data=df['artist_popularity'], kde=True, ax=ax)
-    ax.set_title(f"Popularity Distribution for {genre}")
+    ax.set_title(f"Popularity Distribution for {genre.title()}")
     ax.set_xlabel("Popularity")
     ax.set_ylabel("Number of Artists")
     plt.tight_layout()
@@ -131,7 +131,7 @@ def popularity_distribution_genres(database, genre):
 def linear_regression(database, eras):
     if not eras:
         fig, ax = plt.subplots()
-        ax.set_title("No eras selected")
+        ax.set_title("No Eras Selected")
         return fig
     eras_str = ','.join([f"'{era}'" for era in eras])
     df = pd.read_sql_query(f"SELECT MAX(ar.followers) as followers, MAX(ar.artist_popularity) as artist_popularity FROM artist_data ar JOIN albums_data al ON ar.id = al.artist_id WHERE era IN ({eras_str}) GROUP BY ar.name", database)
@@ -140,9 +140,9 @@ def linear_regression(database, eras):
     ax.scatter(df['followers'], df['artist_popularity'])
     sorted_followers = np.sort(df['followers'])
     ax.plot(sorted_followers, intercept + slope * np.log1p(sorted_followers), color='red')
-    ax.set_xlabel('Amount of followers')
-    ax.set_ylabel('Artist popularity')
-    ax.set_title('Scatter plot followers vs popularity')
+    ax.set_xlabel('Amount of Followers')
+    ax.set_ylabel('Artist Popularity')
+    ax.set_title('Scatterplot Followers vs Popularity')
     return fig
 
 def genres_histogram(database):
@@ -152,13 +152,13 @@ def genres_histogram(database):
     plt.hist(df['number_of_genres'], bins=range(0, 10, 1))
     plt.xlabel('Number of Genres')
     plt.ylabel('Frequency')
-    plt.title('Distribution genres')
+    plt.title('Distribution Genres')
     plt.show()
 
 def top10_genres(database, eras):
     if not eras:
         fig, ax = plt.subplots()
-        ax.set_title("No eras selected")
+        ax.set_title("No Eras Selected")
         return fig
     top10_genres = arda.top10_genres_by_most_followers(database, eras)
     fig, ax = plt.subplots()
@@ -166,7 +166,7 @@ def top10_genres(database, eras):
     ax.set_xticklabels(top10_genres['genre'], rotation=90)
     ax.set_xlabel('Genres')
     ax.set_ylabel('Followers')
-    ax.set_title('Amount of followers top 10 genres')
+    ax.set_title('Amount of Followers Top 10 Genres')
     plt.tight_layout()
     return fig
 
@@ -186,7 +186,8 @@ def bar_plot_top_genre_combination(database, genre):
     ax.bar(df['genre'], df['count'], color=colors)
     ax.set_xticklabels([genre[:15] + "…" if len(genre) > 15 else genre for genre in df['genre']], rotation=45, ha='right')
     ax.set_xlabel('Genre')
-    ax.set_ylabel('Count')
-    ax.set_title(f'Genres {genre} appears with most frequent', fontsize=16, weight='bold')
+    ax.set_ylabel('Times Paired')
+    ax.set_title(f'Genres Most Often Paired with {genre.title()}', fontsize=16, weight='bold')
     plt.tight_layout()
     return fig
+

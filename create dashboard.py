@@ -1,21 +1,23 @@
 import streamlit as st
 import sqlite3
 
-# importing own files
+# Importing own files
 import artist_data_analysis as arda
 import artist_data_visualization as ardv
 import album_data_analysis as alda
+import full_database_analysis as flda
+import full_database_visualization as fldv
+import features_data_analysis as fda
+import features_data_visualization as fdv
 import album_data_visualization as aldv
-import full_database_analysis as fda
-import full_database_visualization as fdv
 
 st.set_page_config(
-    page_title="Opening page",
-    page_icon="start",
+    page_title="Spotify Data Analysis",
+    page_icon="🎵",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
-# cache opening page
+# Cache General Page
 @st.cache_data
 def cached_unique_artists(_database, eras):
     return arda.unique_artists(database, eras)
@@ -50,13 +52,13 @@ def cached_linear_regression(_database, eras):
 
 @st.cache_data
 def cached_pie_tracks(_database, eras):
-    return fldv.pie_chart_tracks(database, eras)
+    return fldv.donut_chart_tracks(database, eras)
 
 @st.cache_data
 def cached_pie_explicit(_database, eras):
-    return fldv.pie_chart_explicit_vs_nonexplicit(database, eras)
+    return fldv.donut_chart_explicit_vs_nonexplicit(database, eras)
 
-# cache feature page
+# Cache Feature Page
 @st.cache_data
 def cached_mean_feature(_database, feature, eras):
     return fda.feature_stats(database, feature, eras, 'mean')
@@ -113,6 +115,7 @@ def cached_bar_feature_ranking_genre_high(_database, feature, eras):
 def cached_bar_feature_ranking_genre_low(_database, feature, eras):
     return fldv.bar_plot_top10_genres_feature_ranking(database, feature, eras, very_low=True)
 
+# Cache Genre Page
 @st.cache_data
 def cached_artists_per_genre(_database, genre):
     return arda.artists_per_genre(database, genre)
@@ -149,6 +152,7 @@ def cached_popularity_distribution_genre(_database, genre):
 def cached_bar_genre_combination(_database, genre):
     return ardv.bar_plot_top_genre_combination(database, genre)
 
+# Cache Artist Page
 @st.cache_data
 def cached_followers_artist(_database, artist):
     return arda.number_followers_artist(database, artist)
@@ -201,14 +205,56 @@ def cached_artist_features_max(_database, artist, feature):
 def cached_boxplot_feature_artist(_database, artist, feature):
     return fldv.box_plot_feature_artist(database, artist, feature)
 
+## ALYSHA KIJK DOE DE CACHE VAN ALBUMS HIER
+# Cache Album Page
+
+
+# Connect to database
 database = sqlite3.connect('spotify_database.db')
-page = st.sidebar.radio('Navigation', ['Opening page', 'Feature', 'Genre', 'Artist', 'Album'])
+
+# Pages and selections
+pages = ['Overview', 'Album', 'Artist', 'Feature', 'Genre']
 eras = ['1900s','1930s','1940s','1950s','1960s','1970s','1980s','1990s','2000s','2010s','2020s']
-features = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms']
+features = ['acousticness', 'danceability', 'duration_ms', 'energy', 'instrumentalness', 'liveness', 'loudness', 'speechiness', 'tempo', 'valence']
 genres = arda.all_genres(database)
 
-if page == 'Opening page':
-    st.title("Opening page")
+# Initialize session state for navbar
+if 'page' not in st.session_state:
+    st.session_state.page = pages[0]
+
+# ---------- NAVIGATION BAR ----------
+cols = st.columns(len(pages))
+for i, page_name in enumerate(pages):
+    # active page style
+    if st.session_state.page == page_name:
+        style = """
+            background-color: rgba(0,0,0,0.3);
+            color: white;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border: none;
+            width: 100%;
+        """
+    else:
+        style = """
+            background-color: #1DB954;
+            color: white;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border: none;
+            width: 100%;
+        """
+    if cols[i].button(page_name, key=page_name):
+        st.session_state.page = page_name
+
+# Current page
+page = st.session_state.page
+
+# ---------- OVERVIEW PAGE ----------
+if page == 'Overview':
+    st.title("General Analysis")
     selected_eras = st.sidebar.multiselect('Select Era(s) to Display:', eras, default=eras)
     total_artists = cached_unique_artists(database, selected_eras)
     total_albums = cached_unique_albums(database, selected_eras)
@@ -223,6 +269,7 @@ if page == 'Opening page':
         st.metric("Total Tracks", f"{total_tracks:,.0f}")
     with col4:
         st.metric("Total Genres", f"{total_genres:,.0f}")
+
     st.divider()
 
     fig = cached_line_chart_popularity(database, selected_eras)
@@ -252,18 +299,30 @@ if page == 'Opening page':
         fig = cached_pie_explicit(database, selected_eras)
         st.pyplot(fig)
 
-elif page =='Feature':
-    st.title("Feature")
-    selected_feature = st.sidebar.selectbox('Select a main Feature to display:', features)
+# ---------- FEATURE PAGE ----------
+elif page == 'Feature':
+    st.title("Feature Analysis")
+    selected_feature = st.sidebar.selectbox('Select a main feature to display:', features)
     compare_feature_list = [feature for feature in features if feature != selected_feature]
-    selected_eras = st.sidebar.multiselect('Select Era(s) to Display:', eras, default=eras)
+    selected_eras = st.sidebar.multiselect('Select era(s) to display:', eras, default=eras)
+
+    # Statistical metrics
     mean_feature = cached_mean_feature(database, selected_feature, selected_eras)
     min_feature = cached_min_feature(database, selected_feature, selected_eras)
     max_feature = cached_max_feature(database, selected_feature, selected_eras)
     std_feature = cached_std_feature(database, selected_feature, selected_eras)
 
-    st.markdown(f'Displayed feature: {selected_feature}')
+    correlation_feature0 = fda.feature_correlation(database, selected_feature, compare_feature_list[0], selected_eras)
+    correlation_feature1 = fda.feature_correlation(database, selected_feature, compare_feature_list[1], selected_eras)
+    correlation_feature2 = fda.feature_correlation(database, selected_feature, compare_feature_list[2], selected_eras)
+    correlation_feature3 = fda.feature_correlation(database, selected_feature, compare_feature_list[3], selected_eras)
+    correlation_feature4 = fda.feature_correlation(database, selected_feature, compare_feature_list[4], selected_eras)
+    correlation_feature5 = fda.feature_correlation(database, selected_feature, compare_feature_list[5], selected_eras)
+    correlation_feature6 = fda.feature_correlation(database, selected_feature, compare_feature_list[6], selected_eras)
+    correlation_feature7 = fda.feature_correlation(database, selected_feature, compare_feature_list[7], selected_eras)
+    correlation_feature8 = fda.feature_correlation(database, selected_feature, compare_feature_list[8], selected_eras)
 
+    st.markdown(f'Displayed Feature: {selected_feature.title()}')
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Mean", f"{mean_feature:,.2f}")
@@ -291,20 +350,20 @@ elif page =='Feature':
 
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
-        st.metric(f"Correlation {compare_feature_list[0]} ", f"{correlation_list[0]:,.2f}")
-        st.metric(f"Correlation {compare_feature_list[1]} ", f"{correlation_list[1]:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[0].title()} ", f"{correlation_list[0]:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[1].title()} ", f"{correlation_list[1]:,.2f}")
     with col2:
-        st.metric(f"Correlation {compare_feature_list[2]} ", f"{correlation_list[2]:,.2f}")
-        st.metric(f"Correlation {compare_feature_list[3]} ", f"{correlation_list[3]:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[2].title()} ", f"{correlation_list[2]:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[3].title()} ", f"{correlation_list[3]:,.2f}")
     with col3:
-        st.metric(f"Correlation {compare_feature_list[4]} ", f"{correlation_list[4]:,.2f}")
-        st.metric(f"Correlation {compare_feature_list[5]} ", f"{correlation_list[5]:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[4].title()} ", f"{correlation_list[4]:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[5].title()} ", f"{correlation_list[5]:,.2f}")
     with col4:
-        st.metric(f"Correlation {compare_feature_list[6]} ", f"{correlation_list[6]:,.2f}")
-        st.metric(f"Correlation {compare_feature_list[7]} ", f"{correlation_list[7]:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[6].title()} ", f"{correlation_list[6]:,.2f}")
+        st.metric(f"Correlation {compare_feature_list[7].title()} ", f"{correlation_list[7]:,.2f}")
     with col5:
-        st.metric(f"Correlation {compare_feature_list[8]} ", f"{correlation_list[8]:,.2f}")
-        st.metric(f"Most correlated to {selected_feature}", f"{compare_feature_list[largest_index]}")
+        st.metric(f"Correlation {compare_feature_list[8].title()} ", f"{correlation_list[8]:,.2f}")
+        st.metric(f"Most correlated to {selected_feature.title()}", f"{compare_feature_list[largest_index]}")
 
     st.divider()
 
@@ -325,14 +384,16 @@ elif page =='Feature':
                 fig = cached_bar_feature_ranking_genre_low(database, selected_feature, selected_eras)
             st.pyplot(fig)
 
+# ---------- GENRE PAGE ----------
 elif page == 'Genre':
-    st.title('Genre')
+    st.title('Genre Analysis')
     selected_genre = st.sidebar.selectbox('Select a Genre to Display:', genres)
     total_artists = cached_artists_per_genre(database, selected_genre)
     average_popularity = cached_average_popularity_per_genre(database, selected_genre)
     total_followers = cached_total_followers_per_genre(database, selected_genre)
     average_followers = cached_average_followers_per_genre(database, selected_genre)
-    st.markdown(f'Displayed Genre: {selected_genre}')
+
+    st.markdown(f'Displayed Genre: {selected_genre.title()}')
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Total Artists", f"{total_artists:,.0f}")
@@ -364,14 +425,17 @@ elif page == 'Genre':
     fig = cached_bar_genre_combination(database, selected_genre)
     st.pyplot(fig)
 
+# ---------- ARTIST PAGE ----------
 elif page == 'Artist':
-    st.title("Artists")
+    st.title("Artist Analysis")
     artist = st.sidebar.text_input('Enter an artist name', 'Taylor Swift')
     number_followers = cached_followers_artist(database, artist)
     popularity = cached_popularity_artist(database, artist)
+
     number_of_albums = cached_albums_artist(database, artist)
     number_of_singles = cached_singles_artist(database, artist)
     number_of_tracks = cached_tracks_artist(database, artist)
+
     st.markdown(f'Displayed Artist: {artist}')
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
@@ -384,8 +448,9 @@ elif page == 'Artist':
         st.metric("Singles", f"{number_of_singles:,.0f}")
     with col5:
         st.metric("Tracks", f"{number_of_tracks:,.0f}")
+
     genres = cached_genres_artist(database, artist)
-    st.markdown(f'Artist Genres: {', '.join(genres)}')
+    st.markdown(f'Artist Genres: {', '.join(genres).title()}')
 
     st.divider()
 
@@ -406,7 +471,7 @@ elif page == 'Artist':
     feature_min = cached_artist_features_min(database, artist, selected_feature)
     feature_std = cached_artist_features_std(database, artist, selected_feature)
 
-    st.markdown(f'Artist Feature Analysis: {selected_feature}')
+    st.markdown(f'Artist Feature Analysis: {selected_feature.title()}')
     left, right = st.columns([1, 1])
     with left:
         row1_col1, row1_col2 = st.columns(2)
@@ -424,19 +489,22 @@ elif page == 'Artist':
         fig = cached_boxplot_feature_artist(database, artist, selected_feature)
         st.pyplot(fig)
 
+# ---------- ALBUM PAGE ----------
 elif page == 'Album':
-    st.title("Albums")
+    st.title("Album Analysis")
     name = st.sidebar.text_input('Enter an album name', 'reputation')
     matching_artists = alda.artists_for_album(database, name)
     if not matching_artists:
         st.warning("No album found with that name.")
         st.stop()
+
     selected_artist = st.sidebar.selectbox('Select the artist:', matching_artists)
     album_duration = alda.album_duration(database, name, selected_artist)
     label = alda.label(database, name, selected_artist)
     total_tracks = alda.total_tracks(database, name, selected_artist)
     release_date = alda.release_date(database, name, selected_artist)
     tracks,fig = aldv.album_tracks(database, name, selected_artist)
+
     col1, col2 = st.columns(2)
     with col1:
         st.metric("Album", name)
