@@ -8,9 +8,6 @@ def x(database):
     print(df.head(10))
     print(df.info())
 
-# def y(database):
-#     df
-
 # danceability vs speechiness
 def speechiness_vs_danceability(database):
     df = pd.read_sql_query("SELECT danceability, speechiness FROM features_data", database)

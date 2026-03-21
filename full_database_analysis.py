@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import ast
 
 def album_features(database, album_id, feature, visualization=False):
     allowed_features = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms']
@@ -20,21 +21,26 @@ def album_features(database, album_id, feature, visualization=False):
             plt.show()
 
 # hier gaat het op album naam dus als er een album naam is die meerdere artiesten gebruiken gaat het fout (miss even navragen en dan aanpassen als nodig)
-def album_features_summary(database, album_name):
-    df = pd.read_sql_query("SELECT f.* FROM features_data f JOIN albums_data a ON f.id = a.track_id WHERE a.album_name = ?", database, params=[album_name])
-    print('Here follows a summary of feature scores on the album: %s' % album_name)
-    print('Danceability score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['danceability'].mean(), df['danceability'].min(), df['danceability'].max(), df['danceability'].std()))
-    print('Energy score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['energy'].mean(), df['energy'].min(), df['energy'].max(), df['energy'].std()))
-    print('Key score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['key'].mean(), df['key'].min(), df['key'].max(), df['key'].std()))
-    print('Loudness score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['loudness'].mean(), df['loudness'].min(), df['loudness'].max(), df['loudness'].std()))
-    print('Mode score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['mode'].mean(), df['mode'].min(), df['mode'].max(), df['mode'].std()))
-    print('Speechiness score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['speechiness'].mean(), df['speechiness'].min(), df['speechiness'].max(), df['speechiness'].std()))
-    print('Acousticness score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['acousticness'].mean(), df['acousticness'].min(), df['acousticness'].max(), df['acousticness'].std()))
-    print('Instrumentalness score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['instrumentalness'].mean(), df['instrumentalness'].min(), df['instrumentalness'].max(), df['instrumentalness'].std()))
-    print('Liveness score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['liveness'].mean(), df['liveness'].min(), df['liveness'].max(), df['liveness'].std()))
-    print('Valence score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['valence'].mean(), df['valence'].min(), df['valence'].max(), df['valence'].std()))
-    print('Tempo score: average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['tempo'].mean(), df['tempo'].min(), df['tempo'].max(), df['tempo'].std()))
-    print('Duration (per ms): average: %.3f, minimum: %.3f, maximum: %.3f, standard deviation: %.3f ' % (df['duration_ms'].mean(), df['duration_ms'].min(), df['duration_ms'].max(), df['duration_ms'].std()))
+def album_features_summary(database, album_name, artist_name):
+    df = pd.read_sql_query("SELECT f.* FROM features_data f JOIN albums_data a ON f.id = a.track_id WHERE LOWER(a.album_name) = LOWER(?) AND LOWER(a.artist_0) = LOWER(?)", database, params=[album_name, artist_name])
+    if df.empty:
+        return "No data found for this album and artist."
+    summary = f"""
+    Here follows a summary of feature scores on the album: {album_name} by {artist_name}
+    Danceability score: average: {df['danceability'].mean():.3f}, minimum: {df['danceability'].min():.3f}, maximum: {df['danceability'].max():.3f}, standard deviation: {df['danceability'].std():.3f}
+    Energy score: average: {df['energy'].mean():.3f}, minimum: {df['energy'].min():.3f}, maximum: {df['energy'].max():.3f}, standard deviation: {df['energy'].std():.3f}
+    Key score: average: {df['key'].mean():.3f}, minimum: {df['key'].min():.3f}, maximum: {df['key'].max():.3f}, standard deviation: {df['key'].std():.3f}
+    Loudness score: average: {df['loudness'].mean():.3f}, minimum: {df['loudness'].min():.3f}, maximum: {df['loudness'].max():.3f}, standard deviation: {df['loudness'].std():.3f}
+    Mode score: average: {df['mode'].mean():.3f}, minimum: {df['mode'].min():.3f}, maximum: {df['mode'].max():.3f}, standard deviation: {df['mode'].std():.3f}
+    Speechiness score: average: {df['speechiness'].mean():.3f}, minimum: {df['speechiness'].min():.3f}, maximum: {df['speechiness'].max():.3f}, standard deviation: {df['speechiness'].std():.3f}
+    Acousticness score: average: {df['acousticness'].mean():.3f}, minimum: {df['acousticness'].min():.3f}, maximum: {df['acousticness'].max():.3f}, standard deviation: {df['acousticness'].std():.3f}
+    Instrumentalness score: average: {df['instrumentalness'].mean():.3f}, minimum: {df['instrumentalness'].min():.3f}, maximum: {df['instrumentalness'].max():.3f}, standard deviation: {df['instrumentalness'].std():.3f}
+    Liveness score: average: {df['liveness'].mean():.3f}, minimum: {df['liveness'].min():.3f}, maximum: {df['liveness'].max():.3f}, standard deviation: {df['liveness'].std():.3f}
+    Valence score: average: {df['valence'].mean():.3f}, minimum: {df['valence'].min():.3f}, maximum: {df['valence'].max():.3f}, standard deviation: {df['valence'].std():.3f}
+    Tempo score: average: {df['tempo'].mean():.3f}, minimum: {df['tempo'].min():.3f}, maximum: {df['tempo'].max():.3f}, standard deviation: {df['tempo'].std():.3f}
+    Duration (per ms): average: {df['duration_ms'].mean():.3f}, minimum: {df['duration_ms'].min():.3f}, maximum: {df['duration_ms'].max():.3f}, standard deviation: {df['duration_ms'].std():.3f}
+    """
+    return summary
 
 def top10_percent_tracks(database, feature):
     allowed_features = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms']
@@ -152,9 +158,52 @@ def artist_features(database, artist, feature, stat):
     df = pd.read_sql_query(f"SELECT al.track_id, al.album_id, f.{feature} FROM albums_data al JOIN features_data f ON al.track_id = f.id JOIN artist_data ar ON al.artist_id = ar.id WHERE ar.name = ?", database, params=[artist])
     if stat == 'mean':
         return df[feature].mean()
-    if stat == 'max':
+    elif stat == 'max':
         return df[feature].max()
-    if stat == 'min':
+    elif stat == 'min':
         return df[feature].min()
-    if stat == 'std':
+    elif stat == 'std':
         return df[feature].std()
+
+def top10_genres_feature_ranking(database, feature, eras, very_low=True):
+    eras_str = ','.join([f"'{era}'" for era in eras])
+    df = pd.read_sql_query(f"""SELECT f.{feature}, ar.artist_genres FROM features_data f JOIN albums_data al ON al.track_id = f.id JOIN artist_data ar ON ar.id = al.artist_id WHERE al.era IN ({eras_str})""", database)
+    df['feature_ranking'] = pd.cut(df[feature], 5, labels=['very low', 'low', 'medium', 'high', 'very high'])
+
+    df['artist_genres'] = df['artist_genres'].apply(ast.literal_eval)
+    df = df.explode(column=['artist_genres']).dropna(subset=['artist_genres'])
+
+    if very_low:
+        low_df = df[df['feature_ranking'] == 'very low']
+        genres_list = low_df['artist_genres'].value_counts().keys().tolist()
+        count_list = low_df['artist_genres'].value_counts().tolist()
+        new_low_df = pd.DataFrame(columns=['genres', 'count'], data={'genres': genres_list, 'count': count_list})
+        return new_low_df.head(10)
+    else:
+        high_df = df[df['feature_ranking'] == 'very high']
+        genres_list = high_df['artist_genres'].value_counts().keys().tolist()
+        count_list = high_df['artist_genres'].value_counts().tolist()
+        new_high_df = pd.DataFrame(columns=['genres', 'count'], data={'genres': genres_list, 'count': count_list})
+        return new_high_df.head(10)
+
+def top10_artists_feature_ranking(database, feature, eras, very_low=True):
+    eras_str = ','.join([f"'{era}'" for era in eras])
+    artist_cols = [f'artist_{i}' for i in range(7)]
+    df = pd.read_sql_query(f"""SELECT f.{feature}, {", ".join("al."+c for c in artist_cols)} FROM features_data f JOIN albums_data al ON al.track_id = f.id JOIN artist_data ar ON ar.id = al.artist_id WHERE al.era IN ({eras_str})""", database)
+    df["artist_list"] = df[artist_cols].apply(lambda row: [a for a in row.dropna() if a != ''], axis=1)
+    df['feature_ranking'] = pd.cut(df[feature], 5, labels=['very low', 'low', 'medium', 'high', 'very high'])
+
+    df = df.explode(column=['artist_list']).dropna(subset=['artist_list'])
+
+    if very_low:
+        low_df = df[df['feature_ranking'] == 'very low']
+        artist_list = low_df['artist_list'].value_counts().keys().tolist()
+        count_list = low_df['artist_list'].value_counts().tolist()
+        new_low_df = pd.DataFrame(columns=['artist', 'count'], data={'artist': artist_list, 'count': count_list})
+        return new_low_df.head(10)
+    else:
+        high_df = df[df['feature_ranking'] == 'very high']
+        artist_list = high_df['artist_list'].value_counts().keys().tolist()
+        count_list = high_df['artist_list'].value_counts().tolist()
+        new_high_df = pd.DataFrame(columns=['artist', 'count'], data={'artist': artist_list, 'count': count_list})
+        return new_high_df.head(10)

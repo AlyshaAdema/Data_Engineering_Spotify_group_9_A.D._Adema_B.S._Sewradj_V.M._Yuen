@@ -1,6 +1,7 @@
 import ast
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import numpy as np
 import seaborn as sns
 import artist_data_analysis as arda
@@ -14,11 +15,22 @@ def top10_followers(database, eras):
     df = pd.read_sql_query(f"SELECT ar.name, MAX(ar.followers) as followers FROM artist_data ar JOIN albums_data al ON ar.id = al.artist_id WHERE era IN ({eras_str}) GROUP BY ar.name", database)
     top10_followers = df.nlargest(10, 'followers')
     fig, ax = plt.subplots()
-    ax.bar(top10_followers['name'], top10_followers['followers'])
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+    ax.tick_params(colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.title.set_color('white')
+    start_color = np.array(mcolors.to_rgb('#1DB954'))
+    end_color = np.array(mcolors.to_rgb('#1DE97C'))
+    n = len(top10_followers)
+    colors = [mcolors.to_hex(start_color + (end_color - start_color) * (i/(n-1))) for i in range(n)]
+    ax.bar(top10_followers['name'], top10_followers['followers'], color=colors)
     ax.set_xticklabels(top10_followers['name'], rotation=90)
     ax.set_xlabel('Artists')
     ax.set_ylabel('Followers')
-    ax.set_title('Amount of Followers Top 10 Artists')
+    ax.set_title('Top Artists by Followers', fontsize=16, weight='bold')
+    ax.grid(axis='x', linestyle='', alpha=0.3, color='white')
     plt.tight_layout()
     return fig
 
@@ -31,33 +43,64 @@ def top10_popularity(database, eras):
     df = pd.read_sql_query(f"SELECT ar.name, MAX(ar.artist_popularity) as artist_popularity FROM artist_data ar JOIN albums_data al ON ar.id = al.artist_id WHERE era IN ({eras_str}) GROUP BY ar.name", database)
     top10_popularity = df.nlargest(10, 'artist_popularity')
     fig, ax = plt.subplots()
-    ax.bar(top10_popularity['name'], top10_popularity['artist_popularity'])
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+    ax.tick_params(colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.title.set_color('white')
+    start_color = np.array(mcolors.to_rgb('#1DB954'))
+    end_color = np.array(mcolors.to_rgb('#1DE97C'))
+    n = len(top10_popularity)
+    colors = [mcolors.to_hex(start_color + (end_color - start_color) * (i/(n-1))) for i in range(n)]
+    ax.bar(top10_popularity['name'], top10_popularity['artist_popularity'], color=colors)
     ax.set_xticklabels(top10_popularity['name'], rotation=90)
     ax.set_xlabel('Artists')
     ax.set_ylabel('Artist Popularity')
-    ax.set_title('Popularity Top 10 Artists')
+    ax.set_title('Top Artists by Popularity', fontsize=16, weight='bold')
+    ax.grid(axis='x', linestyle='', alpha=0.3, color='white')
     plt.tight_layout()
     return fig
 
 def top10_followers_genre(database, genre):
     df = arda.top10_followers_artists_genre(database, genre)
     fig, ax = plt.subplots()
-    ax.bar(df['name'], df['followers'])
-    ax.set_xticklabels(df['name'], rotation=90)
-    ax.set_xlabel(f'Top {genre.title()} Artists')
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+    ax.tick_params(colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.title.set_color('white')
+    start_color = np.array(mcolors.to_rgb('#1DB954'))
+    end_color = np.array(mcolors.to_rgb('#1DE97C'))
+    n = len(df)
+    colors = [mcolors.to_hex(start_color + (end_color - start_color) * (i/(n-1))) for i in range(n)]
+    ax.bar(df['name'], df['followers'], color=colors)
+    ax.set_xticklabels([name[:15] + "…" if len(name) > 15 else name for name in df['name']], rotation=45, ha='right')
+    ax.set_xlabel('Artists')
     ax.set_ylabel('Followers')
-    ax.set_title(f'Amount of Followers Top {genre.title()} Artists')
+    ax.set_title(f'Top {genre.title()} Artists by Followers', fontsize=16, weight='bold')
     plt.tight_layout()
     return fig
 
 def top10_popularity_genre(database, genre):
     df = arda.top10_popularity_artists_genre(database, genre)
     fig, ax = plt.subplots()
-    ax.bar(df['name'], df['artist_popularity'])
-    ax.set_xticklabels(df['name'], rotation=90)
-    ax.set_xlabel('Top Artists')
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+    ax.tick_params(colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.title.set_color('white')
+    start_color = np.array(mcolors.to_rgb('#1DB954'))
+    end_color = np.array(mcolors.to_rgb('#1DE97C'))
+    n = len(df)
+    colors = [mcolors.to_hex(start_color + (end_color - start_color) * (i/(n-1))) for i in range(n)]
+    ax.bar(df['name'], df['artist_popularity'], color=colors)
+    ax.set_xticklabels([name[:15] + "…" if len(name) > 15 else name for name in df['name']], rotation=45, ha='right')
+    ax.set_xlabel('Artists')
     ax.set_ylabel('Popularity')
-    ax.set_title(f'Popularity Top Artists {genre.title()}')
+    ax.set_title(f'Top {genre.title()} Artists by Popularity', fontsize=16, weight='bold')
     plt.tight_layout()
     return fig
 
@@ -130,11 +173,21 @@ def top10_genres(database, eras):
 def bar_plot_top_genre_combination(database, genre):
     df = arda.most_frequent_combination_genre(database, genre)
     fig, ax = plt.subplots()
-    ax.bar(df['genre'], df['count'])
-    ax.set_xticklabels(df['genre'], rotation=90)
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+    ax.tick_params(colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.title.set_color('white')
+    start_color = np.array(mcolors.to_rgb('#1DB954'))
+    end_color = np.array(mcolors.to_rgb('#1DE97C'))
+    n = len(df)
+    colors = [mcolors.to_hex(start_color + (end_color - start_color) * (i/(n-1))) for i in range(n)]
+    ax.bar(df['genre'], df['count'], color=colors)
+    ax.set_xticklabels([genre[:15] + "…" if len(genre) > 15 else genre for genre in df['genre']], rotation=45, ha='right')
     ax.set_xlabel('Genre')
     ax.set_ylabel('Times Paired')
-    ax.set_title(f'Genres Most Often Paired with {genre.title()}')
+    ax.set_title(f'Genres Most Often Paired with {genre.title()}', fontsize=16, weight='bold')
     plt.tight_layout()
     return fig
 
