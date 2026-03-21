@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
 
-
 # importing own files
 import full_database_analysis as fda
 
@@ -12,7 +11,7 @@ def line_chart_track_popularity(database, eras):
         fig, ax = plt.subplots()
         fig.patch.set_facecolor('#121212')
         ax.set_facecolor('#121212')
-        ax.set_title("No eras selected", color='white')
+        ax.set_title("No Eras Selected", color='white')
         return fig
     eras_str = ','.join([f"'{era}'" for era in eras])
     df = pd.read_sql_query(f"SELECT t.track_popularity, al.era FROM tracks_data t JOIN albums_data al ON t.id = al.track_id WHERE al.era IN ({eras_str})", database)
@@ -36,37 +35,45 @@ def line_chart_track_popularity(database, eras):
     plt.xticks(rotation=45, ha='right')
     return fig
 
-def pie_chart_tracks(database, eras):
+def donut_chart_tracks(database, eras):
     if not eras:
         fig, ax = plt.subplots()
         fig.patch.set_facecolor('#121212')
         ax.set_facecolor('#121212')
-        ax.set_title("No eras selected", color='white')
+        ax.set_title("No Eras Selected", color='white')
         return fig
     eras_str = ','.join([f"'{era}'" for era in eras])
     df = pd.read_sql_query(f"SELECT era FROM albums_data WHERE era IN ({eras_str})", database)
     tracks_released = []
     for era in eras:
         tracks_released.append(len(df[df['era'] == era]))
-    fig, ax = plt.subplots()
-    ax.pie(tracks_released, labels=eras, autopct='%1.1f%%')
-    ax.set_title('Tracks released per era')
+    fig, ax = plt.subplots(figsize=(8,5))
+    ax.pie(tracks_released, autopct='%1.1f%%', pctdistance=0.7, startangle=90)
+    centre_circle = plt.Circle((0, 0), 0.5, color='w')
+    ax.add_artist(centre_circle)
+    ax.set_title('Tracks Released per Era')
+    ax.legend(eras, loc="upper right", bbox_to_anchor=(1, 0.5))
+    fig.subplots_adjust(right=0.75)
     return fig
 
-def pie_chart_explicit_vs_nonexplicit(database, eras):
+def donut_chart_explicit_vs_nonexplicit(database, eras):
     if not eras:
         fig, ax = plt.subplots()
         fig.patch.set_facecolor('#121212')
         ax.set_facecolor('#121212')
-        ax.set_title("No eras selected", color='white')
+        ax.set_title("No Eras Selected", color='white')
         return fig
     eras_str = ','.join([f"'{era}'" for era in eras])
     df = pd.read_sql_query(f"SELECT t.explicit, t.track_popularity FROM tracks_data t JOIN albums_data al ON t.id = al.track_id WHERE era IN ({eras_str})", database)
     explicit_tracks = len(df[df['explicit'] == 'true'])
     non_explicit_tracks = len(df[df['explicit'] == 'false'])
-    fig, ax = plt.subplots()
-    ax.pie([explicit_tracks, non_explicit_tracks], labels=['Explicit', 'Non Explicit'], autopct='%1.1f%%')
-    ax.set_title('Explicit tracks vs non explicit')
+    fig, ax = plt.subplots(figsize=(8,5))
+    ax.pie([explicit_tracks, non_explicit_tracks], autopct='%1.1f%%', pctdistance=0.7, startangle=90)
+    centre_circle = plt.Circle((0, 0), 0.5, color='w')
+    ax.add_artist(centre_circle)
+    ax.set_title('Explicit vs Non-explicit Tracks')
+    ax.legend(['Explicit', 'Non-explicit'], loc="upper right", bbox_to_anchor=(1, 0.5))
+    fig.subplots_adjust(right=0.75)
     return fig
 
 def bar_plot_top_5_tracks_artist(database, artist):
@@ -75,7 +82,7 @@ def bar_plot_top_5_tracks_artist(database, artist):
         fig, ax = plt.subplots()
         fig.patch.set_facecolor('#121212')
         ax.set_facecolor('#121212')
-        ax.set_title("No tracks found", color='white')
+        ax.set_title("No Tracks Found", color='white')
         return fig
     fig, ax = plt.subplots()
     fig.patch.set_facecolor('#121212')
@@ -94,9 +101,9 @@ def bar_plot_top_5_tracks_artist(database, artist):
     ax.bar(df['track_name'], df['track_popularity'], color=colors)
     ax.set_xticks(range(len(df)))
     ax.set_xticklabels([name[:15] + "…" if len(name) > 15 else name for name in df['track_name']], rotation=45, ha='right')
-    ax.set_xlabel('Tracks')
+    ax.set_xlabel('Top Tracks')
     ax.set_ylabel('Popularity')
-    ax.set_title(f'Top Tracks of {artist} by Popularity', fontsize=16, weight='bold')
+    ax.set_title('Popularity Top Tracks', fontsize=16, weight='bold')
     plt.tight_layout()
     return fig
 
@@ -106,7 +113,7 @@ def bar_plot_top_5_albums(database, artist):
         fig, ax = plt.subplots()
         fig.patch.set_facecolor('#121212')
         ax.set_facecolor('#121212')
-        ax.set_title("No albums found", color='white')
+        ax.set_title("No Albums Found", color='white')
         return fig
     fig, ax = plt.subplots()
     fig.patch.set_facecolor('#121212')
@@ -125,9 +132,9 @@ def bar_plot_top_5_albums(database, artist):
     ax.bar(df['album_name'], df['album_popularity'], color=colors)
     ax.set_xticks(range(len(df)))
     ax.set_xticklabels([name[:15] + "…" if len(name) > 15 else name for name in df['album_name']], rotation=45, ha='right')
-    ax.set_xlabel('Albums')
+    ax.set_xlabel('Top Albums')
     ax.set_ylabel('Popularity')
-    ax.set_title(f'Top Albums of {artist} by Popularity', fontsize=16, weight='bold')
+    ax.set_title('Popularity Top Albums', fontsize=16, weight='bold')
     plt.tight_layout()
     return fig
 
@@ -137,13 +144,12 @@ def box_plot_feature_artist(database, artist, feature):
         fig, ax = plt.subplots()
         fig.patch.set_facecolor('#121212')
         ax.set_facecolor('#121212')
-        ax.set_title("Artist not found", color='white')
+        ax.set_title("Artist Not Found", color='white')
         return fig
     fig, ax = plt.subplots()
     ax.boxplot(df[feature], vert=False)
     ax.set_yticks([])
     ax.set_xlabel("Values")
-    ax.set_title(f"Boxplot of {feature}")
     return fig
 
 def bar_plot_top10_genres_feature_ranking(database, feature, eras, very_low=True):
@@ -152,7 +158,7 @@ def bar_plot_top10_genres_feature_ranking(database, feature, eras, very_low=True
         fig, ax = plt.subplots()
         fig.patch.set_facecolor('#121212')
         ax.set_facecolor('#121212')
-        ax.set_title("No eras selected", color='white')
+        ax.set_title("No Eras Selected", color='white')
         return fig
     fig, ax = plt.subplots()
     fig.patch.set_facecolor('#121212')
@@ -173,9 +179,9 @@ def bar_plot_top10_genres_feature_ranking(database, feature, eras, very_low=True
     ax.set_xlabel('Genre')
     ax.set_ylabel('Count')
     if very_low:
-        ax.set_title(f'Top Genres with very low {feature}', fontsize=16, weight='bold')
+        ax.set_title(f'Top Genres with Very Low {feature.title()}', fontsize=16, weight='bold')
     else:
-        ax.set_title(f'Top Genres with very high {feature}', fontsize=16, weight='bold')
+        ax.set_title(f'Top Genres with Very High {feature.title()}', fontsize=16, weight='bold')
     ax.grid(axis='x', linestyle='', alpha=0.3, color='white')
     plt.tight_layout()
     return fig
@@ -186,7 +192,7 @@ def bar_plot_top10_artist_feature_ranking(database, feature, eras, very_low=True
         fig, ax = plt.subplots()
         fig.patch.set_facecolor('#121212')
         ax.set_facecolor('#121212')
-        ax.set_title("No eras selected", color='white')
+        ax.set_title("No Eras Selected", color='white')
         return fig
     fig, ax = plt.subplots()
     fig.patch.set_facecolor('#121212')
@@ -207,9 +213,9 @@ def bar_plot_top10_artist_feature_ranking(database, feature, eras, very_low=True
     ax.set_xlabel('Artist')
     ax.set_ylabel('Count')
     if very_low:
-        ax.set_title(f'Top Artists with very low {feature}', fontsize=16, weight='bold')
+        ax.set_title(f'Top Artists with Very Low {feature.title()}', fontsize=16, weight='bold')
     else:
-        ax.set_title(f'Top Artists with very high {feature}', fontsize=16, weight='bold')
+        ax.set_title(f'Top Artists with Very High {feature.title()}', fontsize=16, weight='bold')
     ax.grid(axis='x', linestyle='', alpha=0.3, color='white')
     plt.tight_layout()
     return fig

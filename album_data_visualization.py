@@ -178,7 +178,7 @@ def music_trends_over_time(database):
     plt.xlabel("Year")
     plt.ylabel("Average Value")
     trend[['tempo']].plot(figsize=(10, 6))
-    plt.title("Tempo Over Time")
+    plt.title("Tempo over Time")
     plt.xlabel("Year")
     plt.ylabel("Average Tempo")
     plt.show()
@@ -225,7 +225,7 @@ def album_track_popularity(database, album_name, artist_name):
     else:
         colors = [mcolors.to_hex(start_color + (end_color - start_color) * (i / (n - 1))) for i in range(n)]
     ax.bar(df["track_name"], df["track_popularity"], color=colors)
-    ax.set_title(f"Track popularity on {album_name}", fontsize=16, weight='bold')
+    ax.set_title(f"Track Popularity on {album_name}", fontsize=16, weight='bold')
     ax.set_xlabel("Track")
     ax.set_ylabel("Popularity")
     short_names = [name[:15] + "…" if len(name) > 15 else name for name in df["track_name"]]

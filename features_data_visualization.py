@@ -8,9 +8,6 @@ def x(database):
     print(df.head(10))
     print(df.info())
 
-# def y(database):
-#     df
-
 # danceability vs speechiness
 def speechiness_vs_danceability(database):
     df = pd.read_sql_query("SELECT danceability, speechiness FROM features_data", database)
@@ -118,7 +115,7 @@ def line_chart_features_eras(database, feature, eras):
         fig, ax = plt.subplots()
         fig.patch.set_facecolor('#121212')
         ax.set_facecolor('#121212')
-        ax.set_title("No eras selected", color='white')
+        ax.set_title("No Eras Selected", color='white')
         return fig
     eras_str = ','.join([f"'{era}'" for era in eras])
     df = pd.read_sql_query(f"SELECT f.{feature}, al.era FROM features_data f JOIN albums_data al ON f.id = al.track_id WHERE al.era IN ({eras_str})", database)
@@ -135,8 +132,8 @@ def line_chart_features_eras(database, feature, eras):
     ax.title.set_color('white')
     ax.plot(eras, average, color='#1DB954', marker='o')
     ax.set_xlabel('Era')
-    ax.set_ylabel(f'Average {feature} score')
-    ax.set_title(f'Average {feature} score by era', fontsize=16, weight='bold')
+    ax.set_ylabel(f'Average {feature.title()} Score')
+    ax.set_title(f'Average {feature.title()} Score by Era', fontsize=16, weight='bold')
     ax.grid(axis='y', linestyle='--', alpha=0.3, color='white')
     plt.xticks(rotation=45, ha='right')
     return fig
@@ -148,13 +145,13 @@ def boxplot_feature(database, feature, eras):
         fig, ax = plt.subplots()
         fig.patch.set_facecolor('#121212')
         ax.set_facecolor('#121212')
-        ax.set_title("No eras selected", color='white')
+        ax.set_title("No Eras Selected", color='white')
         return fig
     fig, ax = plt.subplots()
     ax.boxplot(df[feature], vert=False)
     ax.set_yticks([])
     ax.set_xlabel("Values")
-    ax.set_title(f"Boxplot of {feature}")
+    ax.set_title(f"Boxplot of {feature.title()}")
     return fig
 
 def scatterplot_features(database, feature1, feature2, eras):
@@ -164,7 +161,7 @@ def scatterplot_features(database, feature1, feature2, eras):
         fig, ax = plt.subplots()
         fig.patch.set_facecolor('#121212')
         ax.set_facecolor('#121212')
-        ax.set_title("No eras selected", color='white')
+        ax.set_title("No Eras Selected", color='white')
         return fig
     fig, ax = plt.subplots()
     ax.scatter(df[feature1], df[feature2])
