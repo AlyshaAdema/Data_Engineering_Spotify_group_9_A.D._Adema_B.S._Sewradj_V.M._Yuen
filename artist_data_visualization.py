@@ -74,7 +74,13 @@ def top10_followers_genre(database, genre):
     start_color = np.array(mcolors.to_rgb('#1DB954'))
     end_color = np.array(mcolors.to_rgb('#1DE97C'))
     n = len(df)
-    colors = [mcolors.to_hex(start_color + (end_color - start_color) * (i/(n-1))) for i in range(n)]
+    if n == 1:
+        colors = [mcolors.to_hex(start_color)]
+    else:
+        colors = [
+            mcolors.to_hex(start_color + (end_color - start_color) * (i / (n - 1)))
+            for i in range(n)
+        ]
     ax.bar(df['name'], df['followers'], color=colors)
     ax.set_xticklabels([name[:15] + "…" if len(name) > 15 else name for name in df['name']], rotation=45, ha='right')
     ax.set_xlabel('Artists')
@@ -182,7 +188,13 @@ def bar_plot_top_genre_combination(database, genre):
     start_color = np.array(mcolors.to_rgb('#1DB954'))
     end_color = np.array(mcolors.to_rgb('#1DE97C'))
     n = len(df)
-    colors = [mcolors.to_hex(start_color + (end_color - start_color) * (i/(n-1))) for i in range(n)]
+    if n == 1:
+        colors = [mcolors.to_hex(start_color)]
+    else:
+        colors = [
+            mcolors.to_hex(start_color + (end_color - start_color) * (i / (n - 1)))
+            for i in range(n)
+        ]
     ax.bar(df['genre'], df['count'], color=colors)
     ax.set_xticklabels([genre[:15] + "…" if len(genre) > 15 else genre for genre in df['genre']], rotation=45, ha='right')
     ax.set_xlabel('Genre')

@@ -137,10 +137,14 @@ def boxplot_feature(database, feature, eras):
         ax.set_title("No Eras Selected")
         return fig
     fig, ax = plt.subplots()
-    ax.boxplot(df[feature], vert=False)
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+    ax.boxplot(df[feature], vert=False, patch_artist=True, boxprops=dict(facecolor='#1DB954', color='white'), medianprops=dict(color='white'), whiskerprops=dict(color='white'), capprops=dict(color='white'))
     ax.set_yticks([])
-    ax.set_xlabel("Values")
-    ax.set_title(f"Boxplot of {feature.title()}")
+    ax.set_xlabel("Values", color='white')
+    ax.tick_params(colors='white')
+    ax.set_title(f"Boxplot of {feature.title()}", fontsize=16, weight='bold', color='white')
+    plt.tight_layout()
     return fig
 
 def scatterplot_features(database, feature1, feature2, eras):
