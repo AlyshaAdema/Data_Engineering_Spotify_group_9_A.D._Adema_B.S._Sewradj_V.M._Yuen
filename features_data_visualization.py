@@ -113,7 +113,9 @@ def outliers(database):
 def line_chart_features_eras(database, feature, eras):
     if not eras:
         fig, ax = plt.subplots()
-        ax.set_title("No Eras Selected")
+        fig.patch.set_facecolor('#121212')
+        ax.set_facecolor('#121212')
+        ax.set_title("No Eras Selected", color='white')
         return fig
     eras_str = ','.join([f"'{era}'" for era in eras])
     df = pd.read_sql_query(f"SELECT f.{feature}, al.era FROM features_data f JOIN albums_data al ON f.id = al.track_id WHERE al.era IN ({eras_str})", database)
@@ -122,11 +124,18 @@ def line_chart_features_eras(database, feature, eras):
         average_popularity = df[df['era'] == era][feature].mean()
         average.append(average_popularity)
     fig, ax = plt.subplots()
-    ax.plot(eras, average)
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+    ax.tick_params(colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.title.set_color('white')
+    ax.plot(eras, average, color='#1DB954', marker='o')
     ax.set_xlabel('Era')
     ax.set_ylabel(f'Average {feature.title()} Score')
-    ax.set_title(f'Average {feature.title()} Score by Era')
-    plt.xticks(rotation=90)
+    ax.set_title(f'Average {feature.title()} Score by Era', fontsize=16, weight='bold')
+    ax.grid(axis='y', linestyle='--', alpha=0.3, color='white')
+    plt.xticks(rotation=45, ha='right')
     return fig
 
 def boxplot_feature(database, feature, eras):
@@ -134,7 +143,9 @@ def boxplot_feature(database, feature, eras):
     df = pd.read_sql_query(f"SELECT f.{feature} FROM features_data f JOIN albums_data al ON al.track_id = f.id WHERE al.era IN ({eras_str})", database)
     if df is None or df.empty:
         fig, ax = plt.subplots()
-        ax.set_title("No Eras Selected")
+        fig.patch.set_facecolor('#121212')
+        ax.set_facecolor('#121212')
+        ax.set_title("No Eras Selected", color='white')
         return fig
     fig, ax = plt.subplots()
     fig.patch.set_facecolor('#121212')
@@ -152,7 +163,9 @@ def scatterplot_features(database, feature1, feature2, eras):
     df = pd.read_sql_query(f"SELECT f.{feature1}, f.{feature2} FROM features_data f JOIN albums_data al ON al.track_id = f.id WHERE al.era IN ({eras_str})", database)
     if df is None or df.empty:
         fig, ax = plt.subplots()
-        ax.set_title("No Eras Selected")
+        fig.patch.set_facecolor('#121212')
+        ax.set_facecolor('#121212')
+        ax.set_title("No Eras Selected", color='white')
         return fig
     fig, ax = plt.subplots()
     ax.scatter(df[feature1], df[feature2])

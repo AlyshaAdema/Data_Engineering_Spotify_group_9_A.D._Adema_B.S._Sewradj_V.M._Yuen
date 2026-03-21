@@ -10,6 +10,7 @@ import full_database_visualization as fldv
 import features_data_analysis as fda
 import features_data_visualization as fdv
 import album_data_visualization as aldv
+import full_database_visualization as fdv
 
 st.set_page_config(
     page_title="Spotify Data Analysis",
@@ -185,8 +186,54 @@ def cached_artist_features_max(_database, artist, feature):
 def cached_boxplot_feature_artist(_database, artist, feature):
     return fldv.box_plot_feature_artist(_database, artist, feature)
 
-## ALYSHA KIJK DOE DE CACHE VAN ALBUMS HIER
-# Cache Album Page
+# cache album page
+@st.cache_data
+def cached_artist_for_album(_database, name):
+    return alda.artists_for_album(database, name)
+
+@st.cache_data
+def cached_album_duration(_database, name, artist):
+    return alda.album_duration(database, name, artist)
+
+@st.cache_data
+def cached_label(_database, name, artist):
+    return alda.label(database, name, artist)
+
+@st.cache_data
+def cached_total_tracks(_database, name, artist):
+    return alda.total_tracks(database, name, artist)
+
+@st.cache_data
+def cached_release_date(_database, name, artist):
+    return alda.release_date(database, name, artist)
+
+@st.cache_data
+def cached_album_tracks(_database, name, artist):
+    return aldv.album_tracks(database, name, artist)
+
+@st.cache_data
+def cached_album_track_popularity(_database, name, artist):
+    return aldv.album_track_popularity(database, name, artist)
+
+@st.cache_data
+def cached_album_feature(_database, name, artist, feature):
+    return alda.album_feature(database, name, artist, feature)
+
+@st.cache_data
+def cached_plot_album_feature(df, name, artist, feature):
+    return alda.plot_album_feature(df, name, artist, feature)
+
+@st.cache_data
+def cached_album_featured_artist_counts(_database, name, artist):
+    return alda.album_featured_artist_counts(database, name, artist)
+
+@st.cache_data
+def cached_plot_featured_artist_counts(featured_df, name, artist):
+    return alda.plot_featured_artist_counts(featured_df, name, artist)
+
+@st.cache_data
+def cached_album_explicit_pie(_database, name, artist):
+    return alda.album_explicit_pie(database, name, artist)
 
 # Connect to database
 database = sqlite3.connect('spotify_database.db')
@@ -244,6 +291,9 @@ page = st.session_state.page
 if page == 'Overview':
     st.title("General Analysis")
     selected_eras = st.sidebar.multiselect('Select Era(s) to Display:', eras, default=eras)
+    if not selected_eras:
+        st.warning("Please select at least one era to display the dashboard.")
+        st.stop()
     total_artists = cached_unique_artists(database, selected_eras)
     total_albums = cached_unique_albums(database, selected_eras)
     total_tracks = cached_unique_tracks(database, selected_eras)
@@ -292,7 +342,10 @@ elif page == 'Feature':
     st.title("Feature Analysis")
     selected_feature = st.sidebar.selectbox('Select a main feature to display:', features)
     compare_feature_list = [feature for feature in features if feature != selected_feature]
-    selected_eras = st.sidebar.multiselect('Select era(s) to display:', eras, default=eras)
+    selected_eras = st.sidebar.multiselect('Select Era(s) to Display:', eras, default=eras)
+    if not selected_eras:
+        st.warning("Please select at least one era to display the dashboard.")
+        st.stop()
 
     # Statistical metrics
     mean_feature = cached_mean_feature(database, selected_feature, selected_eras)
@@ -485,17 +538,17 @@ elif page == 'Artist':
 elif page == 'Album':
     st.title("Album Analysis")
     name = st.sidebar.text_input('Enter an album name', 'reputation')
-    matching_artists = alda.artists_for_album(database, name)
+    matching_artists = cached_artist_for_album(database, name)
     if not matching_artists:
         st.warning("No album found with that name.")
         st.stop()
 
     selected_artist = st.sidebar.selectbox('Select the artist:', matching_artists)
-    album_duration = alda.album_duration(database, name, selected_artist)
-    label = alda.label(database, name, selected_artist)
-    total_tracks = alda.total_tracks(database, name, selected_artist)
-    release_date = alda.release_date(database, name, selected_artist)
-    tracks,fig = aldv.album_tracks(database, name, selected_artist)
+    album_duration = cached_album_duration(database, name, selected_artist)
+    label = cached_label(database, name, selected_artist)
+    total_tracks = cached_total_tracks(database, name, selected_artist)
+    release_date = cached_release_date(database, name, selected_artist)
+    tracks,fig = cached_album_tracks(database, name, selected_artist)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -518,28 +571,28 @@ elif page == 'Album':
     with left:
         st.pyplot(fig)
     with right:
-        df_pop, fig_pop = aldv.album_track_popularity(database, name, selected_artist)
+        df_pop, fig_pop = cached_album_track_popularity(database, name, selected_artist)
         st.pyplot(fig_pop)
 
     st.divider()
 
     selected_feature = st.selectbox("Choose a feature", features)
-    df = alda.album_feature(database, name, selected_artist, selected_feature)
-    fig = alda.plot_album_feature(df, name, selected_artist, selected_feature)
+    df = cached_album_feature(database, name, selected_artist, selected_feature)
+    fig = cached_plot_album_feature(df, name, selected_artist, selected_feature)
     st.pyplot(fig)
 
     st.divider()
 
     left, right = st.columns(2)
     with left:
-        featured_df = alda.album_featured_artist_counts(database, name, selected_artist)
+        featured_df = cached_album_featured_artist_counts(database, name, selected_artist)
         if not featured_df.empty:
-            fig_featured = alda.plot_featured_artist_counts(featured_df, name, selected_artist)
+            fig_featured = cached_plot_featured_artist_counts(featured_df, name, selected_artist)
             st.pyplot(fig_featured)
         else:
             st.write("No featured artists on this album.")
     with right:
-        fig_explicit = alda.album_explicit_pie(database, name, selected_artist)
+        fig_explicit = cached_album_explicit_pie(database, name, selected_artist)
         if fig_explicit is not None:
             st.pyplot(fig_explicit)
         else:
