@@ -1,11 +1,18 @@
 # Data Engineering Spotify group 9
 This project analyzes Spotify artist and music data.
 
-The project uses multple datasets including:
-- artist dataset
-- volgende datasets wanneer we die gebruikt hebben
+The project uses multple datasets that are put together in a database. These datasets include:
+- Artist dataset
+- Albums dataset
+- Features dataset
+- Tracks dataset
 
-Each dataset is analyzed to explore relationships between music characteristics, popularity, and artist statistics. (dit miss nog aanpassen als we ook andere dingen gaan onderzoeken want weet nog niet wat de andere datasets zijn :))
+Each dataset is analyzed to explore relationships between music characteristics, popularity, artist statistics and a lot more. These analyses are done in mutliple files in this repository. A quick summary of files that are in the repository are:
+- The analysis files
+- The final dashboard file
+- The requirements for the dashboard
+- .streamlit that changes the style of the dashboard
+- The database
 
 ## Artist DataSet Analysis
 The artist dataset contains information about Spotify artists and their musical profiles. The dataset includes the following attributes:
