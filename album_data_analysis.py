@@ -178,12 +178,20 @@ def album_feature(database, album_name, artist_name, feature):
 
 def plot_album_feature(df, album_name, artist_name, feature):
     fig, ax = plt.subplots(figsize=(10, 4))
-    ax.plot(df["track_number"], df[feature], marker='o')
-    ax.set_title(f"{feature} across {album_name}")
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+    ax.tick_params(colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.title.set_color('white')
+    ax.plot(df["track_number"], df[feature], color='#1DB954', marker='o')
+    ax.set_title(f"{feature} across {album_name}", fontsize=16, weight='bold')
     ax.set_xlabel("Track number")
     ax.set_ylabel(feature)
     ax.set_xticks(df["track_number"])
     ax.set_xticklabels(df["track_number"])
+    ax.grid(axis='y', linestyle='--', alpha=0.3, color='white')
+    plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
     return fig
 
@@ -203,11 +211,20 @@ def album_featured_artist_counts(database, album_name, artist_name):
 
 def plot_featured_artist_counts(df, album_name, artist_name):
     fig, ax = plt.subplots(figsize=(8, 4))
-    ax.barh(df["artist"], df["count"])
-    ax.set_title(f"Featured artists on {album_name}")
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+    ax.tick_params(colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.title.set_color('white')
+    ax.barh(df["artist"], df["count"], color='#1DB954')
+    short_artists = [name[:15] + "…" if len(name) > 15 else name for name in df["artist"]]
+    ax.set_yticklabels(short_artists)
+    ax.set_title(f"Featured artists on {album_name}", fontsize=16, weight='bold')
     ax.set_xlabel("Number of tracks")
     ax.set_ylabel("Artist")
     ax.set_xticks(np.arange(0, df["count"].max() + 1, 1))
+    ax.grid(axis='x', linestyle='--', alpha=0.3, color='white')
     plt.tight_layout()
     return fig
 
