@@ -147,9 +147,14 @@ def box_plot_feature_artist(database, artist, feature):
         ax.set_title("Artist Not Found", color='white')
         return fig
     fig, ax = plt.subplots()
-    ax.boxplot(df[feature], vert=False)
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+    ax.boxplot(df[feature], vert=False, patch_artist=True, boxprops=dict(facecolor='#1DB954', color='white'), medianprops=dict(color='white'), whiskerprops=dict(color='white'), capprops=dict(color='white'))
     ax.set_yticks([])
-    ax.set_xlabel("Values")
+    ax.set_xlabel("Values", color='white')
+    ax.tick_params(colors='white')
+    ax.set_title(f"{artist} - {feature.title()} Distribution", fontsize=16, weight='bold', color='white')
+    plt.tight_layout()
     return fig
 
 def bar_plot_top10_genres_feature_ranking(database, feature, eras, very_low=True):
