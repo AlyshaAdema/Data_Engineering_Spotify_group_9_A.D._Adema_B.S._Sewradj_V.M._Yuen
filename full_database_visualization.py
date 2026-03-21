@@ -124,6 +124,7 @@ def box_plot_feature_artist(database, artist, feature):
     ax.boxplot(df[feature], vert=False)
     ax.set_yticks([])
     ax.set_xlabel("Values")
+    return fig
 
 def bar_plot_top10_genres_feature_ranking(database, feature, eras, very_low=True):
     df = fda.top10_genres_feature_ranking(database, feature, eras, very_low)
@@ -176,7 +177,7 @@ def bar_plot_top10_artist_feature_ranking(database, feature, eras, very_low=True
     ax.set_xlabel('Artist')
     ax.set_ylabel('Count')
     if very_low:
-        ax.set_title(f'Top Artists with Very oLw {feature.title()}', fontsize=16, weight='bold')
+        ax.set_title(f'Top Artists with Very Low {feature.title()}', fontsize=16, weight='bold')
     else:
         ax.set_title(f'Top Artists with Very High {feature.title()}', fontsize=16, weight='bold')
     ax.grid(axis='x', linestyle='', alpha=0.3, color='white')

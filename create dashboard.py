@@ -5,9 +5,11 @@ import sqlite3
 import artist_data_analysis as arda
 import artist_data_visualization as ardv
 import album_data_analysis as alda
+import full_database_analysis as flda
+import full_database_visualization as fldv
+import features_data_analysis as fda
+import features_data_visualization as fdv
 import album_data_visualization as aldv
-import full_database_analysis as fda
-import full_database_visualization as fdv
 
 st.set_page_config(
     page_title="Spotify Data Analysis",
@@ -461,6 +463,8 @@ elif page == 'Artist':
         st.pyplot(fig)
 
     st.divider()
+
+    selected_feature = st.selectbox('Select a Feature to Display:', features)
 
     feature_mean = cached_artist_features_mean(database, artist, selected_feature)
     feature_max = cached_artist_features_max(database, artist, selected_feature)
