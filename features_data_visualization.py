@@ -2,13 +2,85 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+def line_chart_features_eras(database, feature, eras):
+    if not eras:
+        fig, ax = plt.subplots()
+        fig.patch.set_facecolor('#121212')
+        ax.set_facecolor('#121212')
+        ax.set_title("No Eras Selected", color='white')
+        return fig
+
+    eras_str = ','.join([f"'{era}'" for era in eras])
+
+    df = pd.read_sql_query(f"""
+        SELECT f.{feature}, al.era 
+        FROM features_data f 
+        JOIN albums_data al ON f.id = al.track_id 
+        WHERE al.era IN ({eras_str})""", database
+    )
+
+    average = []
+    for era in eras:
+        average_popularity = df[df['era'] == era][feature].mean()
+        average.append(average_popularity)
+
+    fig, ax = plt.subplots()
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+
+    ax.tick_params(colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.title.set_color('white')
+
+    ax.plot(eras, average, color='#1DB954', marker='o')
+    ax.set_xlabel('Era')
+    ax.set_ylabel(f'Average {feature.title()} Score')
+    ax.set_title(f'Average {feature.title()} Score by Era', fontsize=16, weight='bold')
+
+    ax.grid(axis='y', linestyle='--', alpha=0.3, color='white')
+
+    plt.xticks(rotation=45, ha='right')
+    return fig
+
+def boxplot_feature(database, feature, eras):
+    eras_str = ','.join([f"'{era}'" for era in eras])
+
+    df = pd.read_sql_query(f"""
+    SELECT f.{feature} 
+    FROM features_data f 
+    JOIN albums_data al ON al.track_id = f.id 
+    WHERE al.era IN ({eras_str})""", database
+    )
+
+    if df is None or df.empty:
+        fig, ax = plt.subplots()
+        fig.patch.set_facecolor('#121212')
+
+        ax.set_facecolor('#121212')
+        ax.set_title("No Eras Selected", color='white')
+
+        return fig
+
+    fig, ax = plt.subplots()
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+
+    ax.boxplot(df[feature], vert=False, patch_artist=True, boxprops=dict(facecolor='#1DB954', color='white'), medianprops=dict(color='white'), whiskerprops=dict(color='white'), capprops=dict(color='white'))
+    ax.set_yticks([])
+    ax.set_xlabel("Values", color='white')
+    ax.tick_params(colors='white')
+    ax.set_title(f"Boxplot of {feature.title()}", fontsize=16, weight='bold', color='white')
+
+    plt.tight_layout()
+    return fig
+
 def x(database):
     pd.set_option('display.max_columns', None)
     df = pd.read_sql_query("SELECT * FROM tracks_data", database)
     print(df.head(10))
     print(df.info())
 
-# danceability vs speechiness
 def speechiness_vs_danceability(database):
     df = pd.read_sql_query("SELECT danceability, speechiness FROM features_data", database)
 
@@ -33,7 +105,6 @@ def comparison_two_features(database, feature1, feature2):
     plt.title(f"Comparison {feature1} and {feature2}")
     plt.show()
 
-# danceability vs energy vs tempo
 def danceability_vs_energy_vs_tempo(database):
     df = pd.read_sql_query("SELECT danceability, energy, tempo FROM features_data", database)
 
@@ -50,7 +121,6 @@ def danceability_vs_energy_vs_tempo(database):
     pp.fig.subplots_adjust(top=0.95)
     plt.show()
 
-# speechiness (spoken words) vs acousticness vs instrumentalness (no vocals)
 def acousticness_vs_instrumentalness_vs_speechiness(database):
     df = pd.read_sql_query("SELECT acousticness, instrumentalness, speechiness FROM features_data", database)
 
@@ -85,12 +155,15 @@ def comparison_three_features(database, feature1, feature2, feature3):
 
 def outliers(database):
     df = pd.read_sql("SELECT * FROM features_data", database)
+
     features = [
         'danceability', 'energy', 'loudness', 'speechiness',
         'acousticness', 'instrumentalness', 'liveness',
         'valence', 'tempo', 'duration_ms'
     ]
+
     outlier_counts = {}
+
     for col in features:
         Q1 = df[col].quantile(0.25)
         Q3 = df[col].quantile(0.75)
@@ -103,73 +176,38 @@ def outliers(database):
         outlier_counts[col] = len(outliers)
 
     plt.figure(figsize=(15, 10))
+
     for i, col in enumerate(features):
         plt.subplot(4, 3, i + 1)
         sns.boxplot(x=df[col])
         plt.title(col)
+
     plt.tight_layout()
     plt.show()
 
-def line_chart_features_eras(database, feature, eras):
-    if not eras:
-        fig, ax = plt.subplots()
-        fig.patch.set_facecolor('#121212')
-        ax.set_facecolor('#121212')
-        ax.set_title("No Eras Selected", color='white')
-        return fig
-    eras_str = ','.join([f"'{era}'" for era in eras])
-    df = pd.read_sql_query(f"SELECT f.{feature}, al.era FROM features_data f JOIN albums_data al ON f.id = al.track_id WHERE al.era IN ({eras_str})", database)
-    average = []
-    for era in eras:
-        average_popularity = df[df['era'] == era][feature].mean()
-        average.append(average_popularity)
-    fig, ax = plt.subplots()
-    fig.patch.set_facecolor('#121212')
-    ax.set_facecolor('#121212')
-    ax.tick_params(colors='white')
-    ax.xaxis.label.set_color('white')
-    ax.yaxis.label.set_color('white')
-    ax.title.set_color('white')
-    ax.plot(eras, average, color='#1DB954', marker='o')
-    ax.set_xlabel('Era')
-    ax.set_ylabel(f'Average {feature.title()} Score')
-    ax.set_title(f'Average {feature.title()} Score by Era', fontsize=16, weight='bold')
-    ax.grid(axis='y', linestyle='--', alpha=0.3, color='white')
-    plt.xticks(rotation=45, ha='right')
-    return fig
-
-def boxplot_feature(database, feature, eras):
-    eras_str = ','.join([f"'{era}'" for era in eras])
-    df = pd.read_sql_query(f"SELECT f.{feature} FROM features_data f JOIN albums_data al ON al.track_id = f.id WHERE al.era IN ({eras_str})", database)
-    if df is None or df.empty:
-        fig, ax = plt.subplots()
-        fig.patch.set_facecolor('#121212')
-        ax.set_facecolor('#121212')
-        ax.set_title("No Eras Selected", color='white')
-        return fig
-    fig, ax = plt.subplots()
-    fig.patch.set_facecolor('#121212')
-    ax.set_facecolor('#121212')
-    ax.boxplot(df[feature], vert=False, patch_artist=True, boxprops=dict(facecolor='#1DB954', color='white'), medianprops=dict(color='white'), whiskerprops=dict(color='white'), capprops=dict(color='white'))
-    ax.set_yticks([])
-    ax.set_xlabel("Values", color='white')
-    ax.tick_params(colors='white')
-    ax.set_title(f"Boxplot of {feature.title()}", fontsize=16, weight='bold', color='white')
-    plt.tight_layout()
-    return fig
-
 def scatterplot_features(database, feature1, feature2, eras):
     eras_str = ','.join([f"'{era}'" for era in eras])
-    df = pd.read_sql_query(f"SELECT f.{feature1}, f.{feature2} FROM features_data f JOIN albums_data al ON al.track_id = f.id WHERE al.era IN ({eras_str})", database)
+
+    df = pd.read_sql_query(f"""
+        SELECT f.{feature1}, f.{feature2} 
+        FROM features_data f 
+        JOIN albums_data al ON al.track_id = f.id 
+        WHERE al.era IN ({eras_str})""", database
+    )
+
     if df is None or df.empty:
         fig, ax = plt.subplots()
         fig.patch.set_facecolor('#121212')
+
         ax.set_facecolor('#121212')
         ax.set_title("No Eras Selected", color='white')
+
         return fig
+
     fig, ax = plt.subplots()
     ax.scatter(df[feature1], df[feature2])
     ax.set_xlabel(f"{feature1} score")
     ax.set_ylabel(f"{feature2} score")
+
     ax.set_title(f"Scatterplot of {feature1} vs {feature2}")
     return fig

@@ -2,7 +2,10 @@ import pandas as pd
 
 def feature_stats(database, feature, eras, stat):
     eras_str = ','.join([f"'{era}'" for era in eras])
-    df = pd.read_sql_query(f"SELECT f.{feature} FROM features_data f JOIN albums_data al ON al.track_id = f.id WHERE al.era IN ({eras_str})", database)
+
+    df = pd.read_sql_query(f"""
+        SELECT f.{feature} FROM features_data f JOIN albums_data al ON al.track_id = f.id WHERE al.era IN ({eras_str})""", database)
+
     if stat == 'mean':
         return df[feature].mean()
     elif stat == 'max':
