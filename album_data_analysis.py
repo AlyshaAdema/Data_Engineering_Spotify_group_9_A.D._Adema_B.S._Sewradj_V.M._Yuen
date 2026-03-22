@@ -15,6 +15,165 @@ def unique_tracks(database, eras):
     df = pd.read_sql_query(f"SELECT track_id FROM albums_data WHERE era in ({eras_str})", database)
     return df['track_id'].nunique()
 
+def artists_for_album(database, album_name):
+    result = pd.read_sql_query(  "SELECT DISTINCT ar.name FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) ORDER BY ar.name", database, params=(album_name,))
+    return result["name"].tolist()
+
+def album_duration(database, album_name, artist_name):
+    df = pd.read_sql_query("SELECT SUM(duration_sec) AS album_duration_sec FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
+
+    if df.empty or df["album_duration_sec"].iloc[0] is None:
+        return None
+
+    total_sec = df["album_duration_sec"].iloc[0]
+    minutes = int(total_sec // 60)
+    seconds = int(total_sec % 60)
+
+    return f"{minutes} min {seconds} sec"
+
+def label(database, album_name, artist_name):
+    df = pd.read_sql_query("SELECT label AS label FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
+
+    if df.empty:
+        return None
+
+    return df["label"].iloc[0]
+
+def total_tracks(database, album_name, artist_name):
+    df = pd.read_sql_query("SELECT total_tracks AS total FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
+
+    if df.empty:
+        return None
+
+    return df["total"].iloc[0]
+
+def release_date(database, album_name, artist_name):
+    df = pd.read_sql_query("SELECT release_date FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
+    df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
+
+    if df.empty:
+        return None
+
+    return df["release_date"].dt.date.iloc[0]
+
+def album_feature(database, album_name, artist_name, feature):
+    df = pd.read_sql_query(f"SELECT al.track_number, al.track_name, ft.{feature} FROM albums_data al JOIN features_data ft ON al.track_id = ft.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(al.artist_0) = LOWER(?) ORDER BY al.track_number", database, params=(album_name, artist_name))
+
+    if df.empty:
+        return None
+
+    df = df.drop_duplicates(subset=["track_number"])
+    return df
+
+def plot_album_feature(df, album_name, artist_name, feature):
+    fig, ax = plt.subplots(figsize=(10, 4))
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+
+    ax.tick_params(colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.title.set_color('white')
+
+    ax.plot(df["track_number"], df[feature], color='#1DB954', marker='o')
+    ax.set_title(f"{feature.title()} across {album_name.title()}", fontsize=16, weight='bold')
+
+    ax.set_xlabel("Track Number")
+    ax.set_ylabel(feature.title())
+
+    ax.set_xticks(df["track_number"])
+    ax.set_xticklabels(df["track_number"])
+
+    ax.grid(axis='y', linestyle='--', alpha=0.3, color='white')
+
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+    return fig
+
+def album_featured_artist_counts(database, album_name, artist_name):
+    df = pd.read_sql_query("SELECT artist_1, artist_2, artist_3, artist_4, artist_5, artist_6 FROM albums_data WHERE LOWER(album_name) = LOWER(?) AND LOWER(artist_0) = LOWER(?)", database, params=(album_name, artist_name))
+
+    if df.empty:
+        return pd.DataFrame(columns=["artist", "count"])
+
+    feature_cols = ["artist_1", "artist_2", "artist_3", "artist_4", "artist_5", "artist_6"]
+
+    all_artists = pd.concat([df[col] for col in feature_cols])
+    all_artists = all_artists.dropna()
+    all_artists = all_artists[all_artists.str.strip() != ""]
+
+    if all_artists.empty:
+        return pd.DataFrame(columns=["artist", "count"])
+
+    result = all_artists.value_counts().reset_index()
+    result.columns = ["artist", "count"]
+    return result
+
+def plot_featured_artist_counts(df, album_name, artist_name):
+    fig, ax = plt.subplots(figsize=(8, 4))
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+
+    ax.tick_params(colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.title.set_color('white')
+
+    ax.barh(df["artist"], df["count"], color='#1DB954')
+
+    short_artists = [
+        name[:15] + "…" if len(name) > 15 else name
+        for name in df["artist"]
+    ]
+
+    ax.set_yticklabels(short_artists)
+    ax.set_title(f"Featured Artists on {album_name.title()}", fontsize=16, weight='bold')
+
+    ax.set_xlabel("Number of Tracks")
+    ax.set_ylabel("Artist")
+
+    ax.set_xticks(np.arange(0, df["count"].max() + 1, 1))
+    ax.grid(axis='x', linestyle='--', alpha=0.3, color='white')
+
+    plt.tight_layout()
+    return fig
+
+def album_explicit_pie(database, album_name, artist_name):
+    df = pd.read_sql_query("""
+        SELECT a.track_id, a.track_name, t.explicit 
+        FROM albums_data a 
+        JOIN tracks_data t ON a.track_id = t.id 
+        WHERE LOWER(a.album_name) = LOWER(?) 
+        AND LOWER(a.artist_0) = LOWER(?)""", database, params=[album_name, artist_name]
+    )
+
+    if df.empty:
+        return None
+
+    explicit_tracks = len(df[df["explicit"] == "true"])
+    non_explicit_tracks = len(df[df["explicit"] == "false"])
+
+    fig, ax = plt.subplots(figsize=(4, 3))
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+
+    ax.pie([explicit_tracks, non_explicit_tracks],
+           autopct="%1.1f%%", pctdistance=0.7, startangle=90,
+           colors=['#1DB954', '#0E7C3A'])
+
+    centre_circle = plt.Circle((0, 0), 0.5, fc="#121212")
+    fig.gca().add_artist(centre_circle)
+
+    ax.set_title(f"Explicit vs Non-explicit on {album_name.title()}", color="w", fontsize=16, weight='bold')
+
+    ax.legend(
+        ["Explicit", "Non-explicit"],
+        loc="upper left",
+        bbox_to_anchor=(1.05, 1)
+    )
+
+    return fig
+
 def album_duration_vs_popularity(database):
     df = pd.read_sql_query("SELECT album_id, SUM(duration_sec) AS album_duration_sec, MAX(album_popularity) AS album_popularity FROM albums_data GROUP BY album_id", database)
     correlation = df["album_duration_sec"].corr(df["album_popularity"])
@@ -24,6 +183,7 @@ def release_year_vs_popularity(database):
     df = pd.read_sql_query("SELECT release_date, album_popularity FROM albums_data", database)
     df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
     df["year"] = df["release_date"].dt.year
+
     result = df.groupby("year")["album_popularity"].mean()
     print(result.reset_index(name="Average Album Popularity"))
 
@@ -33,7 +193,9 @@ def release_year_vs_duration(database):
     df["year"] = df["release_date"].dt.year
     df = df.dropna(subset=["year"])
     df["album_duration_min"] = df["album_duration"] / 60
+
     average_duration = df.groupby("year")["album_duration_min"].mean().sort_index()
+
     print("Average album duration per year (minutes):")
     print(average_duration.reset_index(name="Average Duration (min)"))
 
@@ -104,11 +266,11 @@ def unique_album_names(database):
 def top_albums_per_era(database):
     df = pd.read_sql_query("SELECT DISTINCT era, album_name, album_popularity FROM albums_data WHERE album_popularity IS NOT NULL", database)
     top5 = df.groupby("era").head(5).reset_index(drop=True)
+
     for era, group in top5.groupby("era"):
         print(f"\nTop 5 albums of the {era}:")
         print(group[["album_name", "album_popularity"]])
 
-#part 4
 def music_trends_over_time(database):
     df = pd.read_sql_query("SELECT a.release_date, f.danceability, f.energy, f.valence, f.tempo FROM albums_data a JOIN features_data f ON a.track_id = f.id", database)
     df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce')
@@ -119,12 +281,15 @@ def music_trends_over_time(database):
 
 def outliers(database):
     df = pd.read_sql("SELECT * FROM features_data", database)
+
     features = [
         'danceability', 'energy', 'loudness', 'speechiness',
         'acousticness', 'instrumentalness', 'liveness',
         'valence', 'tempo', 'duration_ms'
     ]
+
     outlier_counts = {}
+
     for col in features:
         Q1 = df[col].quantile(0.25)
         Q3 = df[col].quantile(0.75)
@@ -135,115 +300,5 @@ def outliers(database):
 
         outliers = df[(df[col] < lower) | (df[col] > upper)]
         outlier_counts[col] = len(outliers)
+
     print(outlier_counts)
-
-def artists_for_album(database, album_name):
-    result = pd.read_sql_query(  "SELECT DISTINCT ar.name FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) ORDER BY ar.name", database, params=(album_name,))
-    return result["name"].tolist()
-
-def album_duration(database, album_name, artist_name):
-    df = pd.read_sql_query("SELECT SUM(duration_sec) AS album_duration_sec FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
-    if df.empty or df["album_duration_sec"].iloc[0] is None:
-        return None
-    total_sec = df["album_duration_sec"].iloc[0]
-    minutes = int(total_sec // 60)
-    seconds = int(total_sec % 60)
-    return f"{minutes} min {seconds} sec"
-
-def label(database, album_name, artist_name):
-    df = pd.read_sql_query("SELECT label AS label FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
-    if df.empty:
-        return None
-    return df["label"].iloc[0]
-
-def total_tracks(database, album_name, artist_name):
-    df = pd.read_sql_query("SELECT total_tracks AS total FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
-    if df.empty:
-        return None
-    return df["total"].iloc[0]
-
-def release_date(database, album_name, artist_name):
-    df = pd.read_sql_query("SELECT release_date FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?)", database, params=(album_name, artist_name))
-    df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
-    if df.empty:
-        return None
-    return df["release_date"].dt.date.iloc[0]
-
-def album_feature(database, album_name, artist_name, feature):
-    df = pd.read_sql_query(f"SELECT al.track_number, al.track_name, ft.{feature} FROM albums_data al JOIN features_data ft ON al.track_id = ft.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(al.artist_0) = LOWER(?) ORDER BY al.track_number", database, params=(album_name, artist_name))
-    if df.empty:
-        return None
-    df = df.drop_duplicates(subset=["track_number"])
-    return df
-
-def plot_album_feature(df, album_name, artist_name, feature):
-    fig, ax = plt.subplots(figsize=(10, 4))
-    fig.patch.set_facecolor('#121212')
-    ax.set_facecolor('#121212')
-    ax.tick_params(colors='white')
-    ax.xaxis.label.set_color('white')
-    ax.yaxis.label.set_color('white')
-    ax.title.set_color('white')
-    ax.plot(df["track_number"], df[feature], color='#1DB954', marker='o')
-    ax.set_title(f"{feature.title()} across {album_name.title()}", fontsize=16, weight='bold')
-    ax.set_xlabel("Track Number")
-    ax.set_ylabel(feature.title())
-    ax.set_xticks(df["track_number"])
-    ax.set_xticklabels(df["track_number"])
-    ax.grid(axis='y', linestyle='--', alpha=0.3, color='white')
-    plt.xticks(rotation=45, ha='right')
-    plt.tight_layout()
-    return fig
-
-def album_featured_artist_counts(database, album_name, artist_name):
-    df = pd.read_sql_query("SELECT artist_1, artist_2, artist_3, artist_4, artist_5, artist_6 FROM albums_data WHERE LOWER(album_name) = LOWER(?) AND LOWER(artist_0) = LOWER(?)", database, params=(album_name, artist_name))
-    if df.empty:
-        return pd.DataFrame(columns=["artist", "count"])
-    feature_cols = ["artist_1", "artist_2", "artist_3", "artist_4", "artist_5", "artist_6"]
-    all_artists = pd.concat([df[col] for col in feature_cols])
-    all_artists = all_artists.dropna()
-    all_artists = all_artists[all_artists.str.strip() != ""]
-    if all_artists.empty:
-        return pd.DataFrame(columns=["artist", "count"])
-    result = all_artists.value_counts().reset_index()
-    result.columns = ["artist", "count"]
-    return result
-
-def plot_featured_artist_counts(df, album_name, artist_name):
-    fig, ax = plt.subplots(figsize=(8, 4))
-    fig.patch.set_facecolor('#121212')
-    ax.set_facecolor('#121212')
-    ax.tick_params(colors='white')
-    ax.xaxis.label.set_color('white')
-    ax.yaxis.label.set_color('white')
-    ax.title.set_color('white')
-    ax.barh(df["artist"], df["count"], color='#1DB954')
-    short_artists = [name[:15] + "…" if len(name) > 15 else name for name in df["artist"]]
-    ax.set_yticklabels(short_artists)
-    ax.set_title(f"Featured Artists on {album_name.title()}", fontsize=16, weight='bold')
-    ax.set_xlabel("Number of Tracks")
-    ax.set_ylabel("Artist")
-    ax.set_xticks(np.arange(0, df["count"].max() + 1, 1))
-    ax.grid(axis='x', linestyle='--', alpha=0.3, color='white')
-    plt.tight_layout()
-    return fig
-
-def album_explicit_pie(database, album_name, artist_name):
-    df = pd.read_sql_query("SELECT a.track_id, a.track_name, t.explicit FROM albums_data a JOIN tracks_data t ON a.track_id = t.id WHERE LOWER(a.album_name) = LOWER(?) AND LOWER(a.artist_0) = LOWER(?)",database, params=[album_name, artist_name])
-    if df.empty:
-        return None
-    explicit_tracks = len(df[df["explicit"] == "true"])
-    non_explicit_tracks = len(df[df["explicit"] == "false"])
-    fig, ax = plt.subplots(figsize=(4, 3))
-    fig.patch.set_facecolor('#121212')
-    ax.set_facecolor('#121212')
-    ax.pie([explicit_tracks, non_explicit_tracks], autopct="%1.1f%%", pctdistance=0.7, startangle=90, colors=['#1DB954', '#0E7C3A'])
-    centre_circle = plt.Circle((0, 0), 0.5, fc="#121212")
-    fig.gca().add_artist(centre_circle)
-    ax.set_title(f"Explicit vs Non-explicit on {album_name.title()}", color="w", fontsize=16, weight='bold')
-    ax.legend(
-        ["Explicit", "Non-explicit"],
-        loc="upper left",
-        bbox_to_anchor=(1.05, 1)
-    )
-    return fig
