@@ -34,29 +34,23 @@ def cached_unique_tracks(_database, eras):
 def cached_number_of_genres(_database, eras):
     return arda.number_of_genres(database, eras)
 
-@st.cache_data
 def cached_line_chart_popularity(_database, eras):
-    return fldv.line_chart_track_popularity(database, eras)
+    return fldv.line_chart_track_popularity(_database, eras)
 
-@st.cache_data
 def cached_top10_followers(_database, eras):
-    return ardv.top10_followers(database, eras)
+    return ardv.top10_followers(_database, eras)
 
-@st.cache_data
 def cached_top10_popularity(_database, eras):
-    return ardv.top10_popularity(database, eras)
+    return ardv.top10_popularity(_database, eras)
 
-@st.cache_data
 def cached_linear_regression(_database, eras):
-    return ardv.linear_regression(database, eras)
+    return ardv.linear_regression(_database, eras)
 
-@st.cache_data
 def cached_pie_tracks(_database, eras):
     return fldv.donut_chart_tracks(database, eras)
 
-@st.cache_data
 def cached_pie_explicit(_database, eras):
-    return fldv.donut_chart_explicit_vs_nonexplicit(database, eras)
+    return fldv.donut_chart_explicit_vs_nonexplicit(_database, eras)
 
 # Cache Feature Page
 @st.cache_data
@@ -75,13 +69,11 @@ def cached_max_feature(_database, feature, eras):
 def cached_std_feature(_database, feature, eras):
     return fda.feature_stats(database, feature, eras, 'std')
 
-@st.cache_data
 def cached_line_chart_feature(_database, feature, eras):
-    return fdv.line_chart_features_eras(database, feature, eras)
+    return fdv.line_chart_features_eras(_database, feature, eras)
 
-@st.cache_data
 def cached_boxplot_feature(_database, feature, eras):
-    return fdv.boxplot_feature(database, feature, eras)
+    return fdv.boxplot_feature(_database, feature, eras)
 
 @st.cache_data
 def cached_correlation_list(_database, feature, compare_feature_list, eras):
@@ -99,21 +91,17 @@ def cached_largest_index(correlation_list):
             largest_index = i
     return largest_index
 
-@st.cache_data
 def cached_bar_feature_ranking_artist_high(_database, feature, eras):
     return fldv.bar_plot_top10_artist_feature_ranking(database, feature, eras, very_low=False)
 
-@st.cache_data
 def cached_bar_feature_ranking_artist_low(_database, feature, eras):
-    return fldv.bar_plot_top10_artist_feature_ranking(database, feature, eras, very_low=True)
+    return fldv.bar_plot_top10_artist_feature_ranking(_database, feature, eras, very_low=True)
 
-@st.cache_data
 def cached_bar_feature_ranking_genre_high(_database, feature, eras):
-    return fldv.bar_plot_top10_genres_feature_ranking(database, feature, eras, very_low=False)
+    return fldv.bar_plot_top10_genres_feature_ranking(_database, feature, eras, very_low=False)
 
-@st.cache_data
 def cached_bar_feature_ranking_genre_low(_database, feature, eras):
-    return fldv.bar_plot_top10_genres_feature_ranking(database, feature, eras, very_low=True)
+    return fldv.bar_plot_top10_genres_feature_ranking(_database, feature, eras, very_low=True)
 
 # Cache Genre Page
 @st.cache_data
@@ -132,25 +120,20 @@ def cached_total_followers_per_genre(_database, genre):
 def cached_average_followers_per_genre(_database, genre):
     return arda.average_followers_per_genre(database, genre)
 
-@st.cache_data
 def cached_top10_followers_genre(_database, genre):
-    return ardv.top10_followers_genre(database, genre)
+    return ardv.top10_followers_genre(_database, genre)
 
-@st.cache_data
 def cached_top10_popularity_genre(_database, genre):
-    return ardv.top10_popularity_genre(database, genre)
+    return ardv.top10_popularity_genre(_database, genre)
 
-@st.cache_data
 def cached_followers_distribution_genre(_database, genre):
-    return ardv.followers_distribution_genres(database, genre)
+    return ardv.followers_distribution_genres(_database, genre)
 
-@st.cache_data
 def cached_popularity_distribution_genre(_database, genre):
-    return ardv.popularity_distribution_genres(database, genre)
+    return ardv.popularity_distribution_genres(_database, genre)
 
-@st.cache_data
 def cached_bar_genre_combination(_database, genre):
-    return ardv.bar_plot_top_genre_combination(database, genre)
+    return ardv.bar_plot_top_genre_combination(_database, genre)
 
 # Cache Artist Page
 @st.cache_data
@@ -177,13 +160,11 @@ def cached_tracks_artist(_database, artist):
 def cached_genres_artist(_database, artist):
     return arda.genres_artist(database, artist)
 
-@st.cache_data
 def cached_bar_top5_tracks_artist(_database, artist):
-    return fldv.bar_plot_top_5_tracks_artist(database, artist)
+    return fldv.bar_plot_top_5_tracks_artist(_database, artist)
 
-@st.cache_data
 def cached_bar_top5_albums_artist(_database, artist):
-    return fldv.bar_plot_top_5_albums(database, artist)
+    return fldv.bar_plot_top_5_albums(_database, artist)
 
 @st.cache_data
 def cached_artist_features_mean(_database, artist, feature):
@@ -201,59 +182,60 @@ def cached_artist_features_min(_database, artist, feature):
 def cached_artist_features_max(_database, artist, feature):
     return flda.artist_features(database, artist, feature, 'max')
 
-@st.cache_data
 def cached_boxplot_feature_artist(_database, artist, feature):
-    return fldv.box_plot_feature_artist(database, artist, feature)
+    return fldv.box_plot_feature_artist(_database, artist, feature)
 
-# cache album page
+# Cache Album Page
 @st.cache_data
 def cached_artist_for_album(_database, name):
-    return alda.artists_for_album(database, name)
+    return alda.artists_for_album(_database, name)
 
 @st.cache_data
 def cached_album_duration(_database, name, artist):
-    return alda.album_duration(database, name, artist)
+    return alda.album_duration(_database, name, artist)
 
 @st.cache_data
 def cached_label(_database, name, artist):
-    return alda.label(database, name, artist)
+    return alda.label(_database, name, artist)
 
 @st.cache_data
 def cached_total_tracks(_database, name, artist):
-    return alda.total_tracks(database, name, artist)
+    return alda.total_tracks(_database, name, artist)
 
 @st.cache_data
 def cached_release_date(_database, name, artist):
-    return alda.release_date(database, name, artist)
+    return alda.release_date(_database, name, artist)
 
 @st.cache_data
 def cached_album_tracks(_database, name, artist):
-    return aldv.album_tracks(database, name, artist)
+    return aldv.album_tracks(_database, name, artist)
+
+def plot_album_tracks(tracks_df, name, artist):
+    return aldv.plot_album_tracks(tracks_df, name, artist)
 
 @st.cache_data
 def cached_album_track_popularity(_database, name, artist):
-    return aldv.album_track_popularity(database, name, artist)
+    return aldv.album_track_popularity(_database, name, artist)
 
 @st.cache_data
 def cached_album_feature(_database, name, artist, feature):
-    return alda.album_feature(database, name, artist, feature)
+    return alda.album_feature(_database, name, artist, feature)
 
-@st.cache_data
 def cached_plot_album_feature(df, name, artist, feature):
     return alda.plot_album_feature(df, name, artist, feature)
 
 @st.cache_data
 def cached_album_featured_artist_counts(_database, name, artist):
-    return alda.album_featured_artist_counts(database, name, artist)
+    return alda.album_featured_artist_counts(_database, name, artist)
 
-@st.cache_data
 def cached_plot_featured_artist_counts(featured_df, name, artist):
     return alda.plot_featured_artist_counts(featured_df, name, artist)
 
 @st.cache_data
 def cached_album_explicit_pie(_database, name, artist):
-    return alda.album_explicit_pie(database, name, artist)
+    return alda.album_explicit_pie(_database, name, artist)
 
+# Connect to database
 database = sqlite3.connect('spotify_database.db')
 
 # Pages and selections
@@ -267,8 +249,17 @@ if 'page' not in st.session_state:
     st.session_state.page = pages[0]
 
 # ---------- NAVIGATION BAR ----------
+icons = {
+    "Overview": "🏠",
+    "Artist": "🎤",
+    "Album": "💿",
+    "Feature": "📊",
+    "Genre": "🎶"
+}
 cols = st.columns(len(pages))
 for i, page_name in enumerate(pages):
+    label = f"{icons.get(page_name, '')} {page_name}"
+
     # active page style
     if st.session_state.page == page_name:
         style = """
@@ -290,7 +281,7 @@ for i, page_name in enumerate(pages):
             border: none;
             width: 100%;
         """
-    if cols[i].button(page_name, key=page_name):
+    if cols[i].button(label, key=page_name):
         st.session_state.page = page_name
 
 # Current page
@@ -362,7 +353,17 @@ elif page == 'Feature':
     max_feature = cached_max_feature(database, selected_feature, selected_eras)
     std_feature = cached_std_feature(database, selected_feature, selected_eras)
 
-    st.markdown(f'Displayed Feature: {selected_feature.title()}')
+    correlation_feature0 = fda.feature_correlation(database, selected_feature, compare_feature_list[0], selected_eras)
+    correlation_feature1 = fda.feature_correlation(database, selected_feature, compare_feature_list[1], selected_eras)
+    correlation_feature2 = fda.feature_correlation(database, selected_feature, compare_feature_list[2], selected_eras)
+    correlation_feature3 = fda.feature_correlation(database, selected_feature, compare_feature_list[3], selected_eras)
+    correlation_feature4 = fda.feature_correlation(database, selected_feature, compare_feature_list[4], selected_eras)
+    correlation_feature5 = fda.feature_correlation(database, selected_feature, compare_feature_list[5], selected_eras)
+    correlation_feature6 = fda.feature_correlation(database, selected_feature, compare_feature_list[6], selected_eras)
+    correlation_feature7 = fda.feature_correlation(database, selected_feature, compare_feature_list[7], selected_eras)
+    correlation_feature8 = fda.feature_correlation(database, selected_feature, compare_feature_list[8], selected_eras)
+
+    st.metric("Feature", selected_feature)
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Mean", f"{mean_feature:,.2f}")
@@ -433,7 +434,7 @@ elif page == 'Genre':
     total_followers = cached_total_followers_per_genre(database, selected_genre)
     average_followers = cached_average_followers_per_genre(database, selected_genre)
 
-    st.markdown(f'Displayed Genre: {selected_genre.title()}')
+    st.metric("Genre", selected_genre)
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Total Artists", f"{total_artists:,.0f}")
@@ -469,6 +470,10 @@ elif page == 'Genre':
 elif page == 'Artist':
     st.title("Artist Analysis")
     artist = st.sidebar.text_input('Enter an artist name', 'Taylor Swift')
+    genres = cached_genres_artist(database, artist)
+    if not genres:
+        st.warning("No artist found with that name.")
+        st.stop()
     number_followers = cached_followers_artist(database, artist)
     popularity = cached_popularity_artist(database, artist)
 
@@ -476,21 +481,21 @@ elif page == 'Artist':
     number_of_singles = cached_singles_artist(database, artist)
     number_of_tracks = cached_tracks_artist(database, artist)
 
-    st.markdown(f'Displayed Artist: {artist}')
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2 = st.columns(2)
     with col1:
-        st.metric("Followers", f"{number_followers:,.0f}")
+        st.metric("Artist", artist)
     with col2:
+        st.metric("Followers", f"{number_followers:,.0f}")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
         st.metric("Popularity", f"{popularity:,.0f}")
-    with col3:
+    with col2:
         st.metric("Albums", f"{number_of_albums:,.0f}")
-    with col4:
+    with col3:
         st.metric("Singles", f"{number_of_singles:,.0f}")
-    with col5:
+    with col4:
         st.metric("Tracks", f"{number_of_tracks:,.0f}")
-
-    genres = cached_genres_artist(database, artist)
-    st.markdown(f'Artist Genres: {', '.join(genres).title()}')
+    st.metric("Genre", ",".join(genres).title())
 
     st.divider()
 
@@ -511,9 +516,9 @@ elif page == 'Artist':
     feature_min = cached_artist_features_min(database, artist, selected_feature)
     feature_std = cached_artist_features_std(database, artist, selected_feature)
 
-    st.markdown(f'Artist Feature Analysis: {selected_feature.title()}')
     left, right = st.columns([1, 1])
     with left:
+        st.markdown(f'Artist Feature Analysis: {selected_feature.title()}')
         row1_col1, row1_col2 = st.columns(2)
         with row1_col1:
             st.metric("Mean", f"{feature_mean:.2f}")
@@ -543,7 +548,8 @@ elif page == 'Album':
     label = cached_label(database, name, selected_artist)
     total_tracks = cached_total_tracks(database, name, selected_artist)
     release_date = cached_release_date(database, name, selected_artist)
-    tracks,fig = cached_album_tracks(database, name, selected_artist)
+    tracks = cached_album_tracks(database, name, selected_artist)
+    fig = aldv.plot_album_tracks(tracks, name)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -566,7 +572,8 @@ elif page == 'Album':
     with left:
         st.pyplot(fig)
     with right:
-        df_pop, fig_pop = cached_album_track_popularity(database, name, selected_artist)
+        df_pop = cached_album_track_popularity(database, name, selected_artist)
+        fig_pop = aldv.plot_album_track_popularity(df_pop, name)
         st.pyplot(fig_pop)
 
     st.divider()

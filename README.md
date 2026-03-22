@@ -11,7 +11,7 @@ Each dataset is analyzed to explore relationships between music characteristics,
 ### Repository Contents
 - **Analysis files** - Scripts for calculating statistics and exploring the data
 - **Visualization files** - Scripts for creating charts and graphs of the data
-- **Final dashboard file** - The main dashboard visualizing insights.
+- **Final dashboard file** - The main dashboard visualizing insights
 - **Dashboard requirements** - List of tools and packages needed to run the dashboard
 - **.streamlit folder** - Custom configuration for the dashboard's styling
 - **Database** - The Spotify database used for analysis
