@@ -184,7 +184,11 @@ def music_trends_over_time(database):
     plt.show()
 
 def album_tracks(database, album_name, artist_name):
-    df = pd.read_sql_query("SELECT al.track_number, al.track_name, al.duration_sec FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?) ORDER BY al.track_number", database, params=(album_name, artist_name))
+    df = pd.read_sql_query("SELECT al.track_number, al.track_name, al.duration_sec FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?) GROUP BY al.track_number, al.track_name ORDER BY al.track_number", database,params=(album_name, artist_name))
+    df = df.drop_duplicates(subset=["track_number", "track_name"])
+    return df
+
+def plot_album_tracks(df, album_name):
     fig, ax = plt.subplots()
     fig.patch.set_facecolor('#121212')
     ax.set_facecolor('#121212')
@@ -198,18 +202,30 @@ def album_tracks(database, album_name, artist_name):
     if n == 1:
         colors = [mcolors.to_hex(start_color)]
     else:
-        colors = [mcolors.to_hex(start_color + (end_color - start_color) * (i / (n - 1))) for i in range(n)]
-    ax.bar(df["track_name"], df["duration_sec"]/60, color=colors)
+        colors = [
+            mcolors.to_hex(start_color + (end_color - start_color) * (i / (n - 1)))
+            for i in range(n)
+        ]
+    x = np.arange(len(df))
+    ax.bar(x, df["duration_sec"] / 60, color=colors)
     ax.set_title(f"Tracks on {album_name}", fontsize=16, weight='bold')
     ax.set_xlabel("Track")
     ax.set_ylabel("Duration (min)")
-    short_names = [name[:15] + "…" if len(name) > 15 else name for name in df["track_name"]]
+    short_names = [
+        name[:15] + "…" if len(name) > 15 else name
+        for name in df["track_name"]
+    ]
+    ax.set_xticks(x)
     ax.set_xticklabels(short_names, rotation=45, ha="right")
     plt.tight_layout()
-    return df, fig
+    return fig
 
 def album_track_popularity(database, album_name, artist_name):
-    df = pd.read_sql_query("SELECT al.track_number, al.track_name, t.track_popularity FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id JOIN tracks_data t ON al.track_id = t.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?) ORDER BY al.track_number", database, params=(album_name, artist_name))
+    df = pd.read_sql_query("SELECT al.track_number, al.track_name, t.track_popularity FROM albums_data al JOIN artist_data ar ON al.artist_id = ar.id JOIN tracks_data t ON al.track_id = t.id WHERE LOWER(al.album_name) = LOWER(?) AND LOWER(ar.name) = LOWER(?) GROUP BY al.track_number, al.track_name ORDER BY al.track_number", database, params=(album_name, artist_name))
+    df = df.drop_duplicates(subset=["track_number", "track_name"])
+    return df
+
+def plot_album_track_popularity(df, album_name):
     fig, ax = plt.subplots()
     fig.patch.set_facecolor('#121212')
     ax.set_facecolor('#121212')
@@ -223,12 +239,21 @@ def album_track_popularity(database, album_name, artist_name):
     if n == 1:
         colors = [mcolors.to_hex(start_color)]
     else:
-        colors = [mcolors.to_hex(start_color + (end_color - start_color) * (i / (n - 1))) for i in range(n)]
-    ax.bar(df["track_name"], df["track_popularity"], color=colors)
+        colors = [
+            mcolors.to_hex(start_color + (end_color - start_color) * (i / (n - 1)))
+            for i in range(n)
+        ]
+    x = np.arange(len(df))
+    ax.bar(x, df["track_popularity"], color=colors)
     ax.set_title(f"Track Popularity on {album_name}", fontsize=16, weight='bold')
     ax.set_xlabel("Track")
     ax.set_ylabel("Popularity")
-    short_names = [name[:15] + "…" if len(name) > 15 else name for name in df["track_name"]]
+    short_names = [
+        name[:15] + "…" if len(name) > 15 else name
+        for name in df["track_name"]
+    ]
+    ax.set_xticks(x)
     ax.set_xticklabels(short_names, rotation=45, ha="right")
     plt.tight_layout()
-    return df, fig
+    return fig
+

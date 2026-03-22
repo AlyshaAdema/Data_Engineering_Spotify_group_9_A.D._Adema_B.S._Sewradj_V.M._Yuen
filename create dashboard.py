@@ -186,54 +186,55 @@ def cached_artist_features_max(_database, artist, feature):
 def cached_boxplot_feature_artist(_database, artist, feature):
     return fldv.box_plot_feature_artist(_database, artist, feature)
 
-# cache album page
+# Cache Album Page
 @st.cache_data
 def cached_artist_for_album(_database, name):
-    return alda.artists_for_album(database, name)
+    return alda.artists_for_album(_database, name)
 
 @st.cache_data
 def cached_album_duration(_database, name, artist):
-    return alda.album_duration(database, name, artist)
+    return alda.album_duration(_database, name, artist)
 
 @st.cache_data
 def cached_label(_database, name, artist):
-    return alda.label(database, name, artist)
+    return alda.label(_database, name, artist)
 
 @st.cache_data
 def cached_total_tracks(_database, name, artist):
-    return alda.total_tracks(database, name, artist)
+    return alda.total_tracks(_database, name, artist)
 
 @st.cache_data
 def cached_release_date(_database, name, artist):
-    return alda.release_date(database, name, artist)
+    return alda.release_date(_database, name, artist)
 
 @st.cache_data
 def cached_album_tracks(_database, name, artist):
-    return aldv.album_tracks(database, name, artist)
+    return aldv.album_tracks(_database, name, artist)
+
+def plot_album_tracks(tracks_df, name, artist):
+    return aldv.plot_album_tracks(tracks_df, name, artist)
 
 @st.cache_data
 def cached_album_track_popularity(_database, name, artist):
-    return aldv.album_track_popularity(database, name, artist)
+    return aldv.album_track_popularity(_database, name, artist)
 
 @st.cache_data
 def cached_album_feature(_database, name, artist, feature):
-    return alda.album_feature(database, name, artist, feature)
+    return alda.album_feature(_database, name, artist, feature)
 
-@st.cache_data
 def cached_plot_album_feature(df, name, artist, feature):
     return alda.plot_album_feature(df, name, artist, feature)
 
 @st.cache_data
 def cached_album_featured_artist_counts(_database, name, artist):
-    return alda.album_featured_artist_counts(database, name, artist)
+    return alda.album_featured_artist_counts(_database, name, artist)
 
-@st.cache_data
 def cached_plot_featured_artist_counts(featured_df, name, artist):
     return alda.plot_featured_artist_counts(featured_df, name, artist)
 
 @st.cache_data
 def cached_album_explicit_pie(_database, name, artist):
-    return alda.album_explicit_pie(database, name, artist)
+    return alda.album_explicit_pie(_database, name, artist)
 
 # Connect to database
 database = sqlite3.connect('spotify_database.db')
@@ -548,7 +549,8 @@ elif page == 'Album':
     label = cached_label(database, name, selected_artist)
     total_tracks = cached_total_tracks(database, name, selected_artist)
     release_date = cached_release_date(database, name, selected_artist)
-    tracks,fig = cached_album_tracks(database, name, selected_artist)
+    tracks = cached_album_tracks(database, name, selected_artist)
+    fig = aldv.plot_album_tracks(tracks, name)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -571,7 +573,8 @@ elif page == 'Album':
     with left:
         st.pyplot(fig)
     with right:
-        df_pop, fig_pop = cached_album_track_popularity(database, name, selected_artist)
+        df_pop = cached_album_track_popularity(database, name, selected_artist)
+        fig_pop = aldv.plot_album_track_popularity(df_pop, name)
         st.pyplot(fig_pop)
 
     st.divider()
