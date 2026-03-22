@@ -10,7 +10,6 @@ import full_database_visualization as fldv
 import features_data_analysis as fda
 import features_data_visualization as fdv
 import album_data_visualization as aldv
-import full_database_visualization as fdv
 
 st.set_page_config(
     page_title="Spotify Data Analysis",
@@ -404,7 +403,7 @@ elif page == 'Feature':
         st.metric(f"Correlation {compare_feature_list[7].title()} ", f"{correlation_list[7]:,.2f}")
     with col5:
         st.metric(f"Correlation {compare_feature_list[8].title()} ", f"{correlation_list[8]:,.2f}")
-        st.metric(f"Most correlated to {selected_feature.title()}", f"{compare_feature_list[largest_index]}")
+        st.metric(f"Most Correlated to {selected_feature.title()}", f"{compare_feature_list[largest_index].title()}")
 
     st.divider()
 
@@ -548,9 +547,9 @@ elif page == 'Album':
 
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Album", name)
+        st.metric("Album", name.title())
     with col2:
-        st.metric("Label", label)
+        st.metric("Label", label.title())
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric( "Artist", selected_artist)

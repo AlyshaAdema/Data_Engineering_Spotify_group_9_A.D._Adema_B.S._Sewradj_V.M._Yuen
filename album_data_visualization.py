@@ -200,7 +200,7 @@ def album_tracks(database, album_name, artist_name):
     else:
         colors = [mcolors.to_hex(start_color + (end_color - start_color) * (i / (n - 1))) for i in range(n)]
     ax.bar(df["track_name"], df["duration_sec"]/60, color=colors)
-    ax.set_title(f"Tracks on {album_name}", fontsize=16, weight='bold')
+    ax.set_title(f"Tracks on {album_name.title()}", fontsize=16, weight='bold')
     ax.set_xlabel("Track")
     ax.set_ylabel("Duration (min)")
     short_names = [name[:15] + "…" if len(name) > 15 else name for name in df["track_name"]]
@@ -225,7 +225,7 @@ def album_track_popularity(database, album_name, artist_name):
     else:
         colors = [mcolors.to_hex(start_color + (end_color - start_color) * (i / (n - 1))) for i in range(n)]
     ax.bar(df["track_name"], df["track_popularity"], color=colors)
-    ax.set_title(f"Track Popularity on {album_name}", fontsize=16, weight='bold')
+    ax.set_title(f"Track Popularity on {album_name.title()}", fontsize=16, weight='bold')
     ax.set_xlabel("Track")
     ax.set_ylabel("Popularity")
     short_names = [name[:15] + "…" if len(name) > 15 else name for name in df["track_name"]]
