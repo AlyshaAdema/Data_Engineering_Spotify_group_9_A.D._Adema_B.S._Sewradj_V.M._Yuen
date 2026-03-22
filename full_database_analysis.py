@@ -254,3 +254,51 @@ def top10_artists_feature_ranking(database, feature, eras, very_low=True):
 
         new_high_df = pd.DataFrame(columns=['artist', 'count'], data={'artist': artist_list, 'count': count_list})
         return new_high_df.head(10)
+
+# The following functions were used to attempt to identify dupliates in artist_data
+def look_up_certain_artist(database, artist_id):
+    pd.set_option('display.max_columns', None)
+    # df = pd.read_sql_query("SELECT al.track_name, al.artist_0, al.label, t.explicit FROM albums_data al JOIN tracks_data t ON t.id = al.track_id WHERE artist_id = ?", database, params=(artist_id,))
+    df = pd.read_sql_query("SELECT track_name , artist_0, label FROM albums_data WHERE artist_id = ?", database, params=(artist_id,))
+    print(df)
+
+def artists_with_same_name(database, name):
+    pd.set_option('display.max_columns', None)
+    df = pd.read_sql_query("SELECT id, name, artist_popularity, artist_genres, followers FROM artist_data", database)
+    print(df[df['name'] == name])
+
+def check_exact_duplicates(database):
+    pd.set_option('display.max_columns', None)
+    df = pd.read_sql_query("""SELECT name, artist_popularity,
+    artist_genres, followers, genre_0, genre_1, genre_2, genre_3, genre_4,
+    genre_5, genre_6 FROM artist_data""", database)
+    print(df[df.duplicated() == True])
+
+
+def check_duplicates(database):
+    pd.set_option('display.max_columns', None)
+    df = pd.read_sql_query("""SELECT name, artist_genres FROM artist_data""", database)
+    print(df[df.duplicated(keep=False) == True].sort_values('name'))
+
+def duplicate_artists(database):
+    pd.set_option('display.max_columns', None)
+    # pd.set_option('display.max_rows', None)
+    df = pd.read_sql_query("SELECT * FROM artist_data", database)
+    duplicates = df[df['name'].duplicated(keep=False)]
+    print(duplicates[['name', 'id', 'artist_genres', 'artist_popularity']].sort_values('name'))
+
+def capitalization(database):
+    pd.set_option('display.max_columns', None)
+    df = pd.read_sql_query("SELECT * FROM artist_data", database)
+
+def duplicates(database):
+    pd.set_option('display.max_columns', None)
+    df = pd.read_sql_query("SELECT id, name, artist_popularity, artist_genres, followers FROM artist_data", database)
+    duplicates = df[df['name'].duplicated(keep=False)]
+    print(duplicates)
+
+def clean_artist_data(database):
+    df = pd.read_sql_query("SELECT id, name FROM artist_data", database)
+
+    # print(df['name'].duplicated() == True)
+    print(df[df['name'].duplicated() == True].value_counts())
