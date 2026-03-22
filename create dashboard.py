@@ -363,7 +363,7 @@ elif page == 'Feature':
     correlation_feature7 = fda.feature_correlation(database, selected_feature, compare_feature_list[7], selected_eras)
     correlation_feature8 = fda.feature_correlation(database, selected_feature, compare_feature_list[8], selected_eras)
 
-    st.metric("Feature", selected_feature)
+    st.metric("Feature", selected_feature.title())
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Mean", f"{mean_feature:,.2f}")
@@ -404,7 +404,7 @@ elif page == 'Feature':
         st.metric(f"Correlation {compare_feature_list[7].title()} ", f"{correlation_list[7]:,.2f}")
     with col5:
         st.metric(f"Correlation {compare_feature_list[8].title()} ", f"{correlation_list[8]:,.2f}")
-        st.metric(f"Most correlated to {selected_feature.title()}", f"{compare_feature_list[largest_index]}")
+        st.metric(f"Most Correlated to {selected_feature.title()}", f"{compare_feature_list[largest_index].title()}")
 
     st.divider()
 
@@ -434,7 +434,7 @@ elif page == 'Genre':
     total_followers = cached_total_followers_per_genre(database, selected_genre)
     average_followers = cached_average_followers_per_genre(database, selected_genre)
 
-    st.metric("Genre", selected_genre)
+    st.metric("Genre", selected_genre.title())
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Total Artists", f"{total_artists:,.0f}")
@@ -553,9 +553,9 @@ elif page == 'Album':
 
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Album", name)
+        st.metric("Album", name.title())
     with col2:
-        st.metric("Label", label)
+        st.metric("Label", label.title())
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric( "Artist", selected_artist)
@@ -578,7 +578,7 @@ elif page == 'Album':
 
     st.divider()
 
-    selected_feature = st.selectbox("Choose a feature", features)
+    selected_feature = st.selectbox("Choose a feature:", features)
     df = cached_album_feature(database, name, selected_artist, selected_feature)
     fig = cached_plot_album_feature(df, name, selected_artist, selected_feature)
     st.pyplot(fig)

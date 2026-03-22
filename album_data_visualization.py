@@ -208,7 +208,7 @@ def plot_album_tracks(df, album_name):
         ]
     x = np.arange(len(df))
     ax.bar(x, df["duration_sec"] / 60, color=colors)
-    ax.set_title(f"Tracks on {album_name}", fontsize=16, weight='bold')
+    ax.set_title(f"Tracks on {album_name.title()}", fontsize=16, weight='bold')
     ax.set_xlabel("Track")
     ax.set_ylabel("Duration (min)")
     short_names = [
@@ -245,7 +245,7 @@ def plot_album_track_popularity(df, album_name):
         ]
     x = np.arange(len(df))
     ax.bar(x, df["track_popularity"], color=colors)
-    ax.set_title(f"Track Popularity on {album_name}", fontsize=16, weight='bold')
+    ax.set_title(f"Track Popularity on {album_name.title()}", fontsize=16, weight='bold')
     ax.set_xlabel("Track")
     ax.set_ylabel("Popularity")
     short_names = [

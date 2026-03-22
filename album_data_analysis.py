@@ -185,9 +185,9 @@ def plot_album_feature(df, album_name, artist_name, feature):
     ax.yaxis.label.set_color('white')
     ax.title.set_color('white')
     ax.plot(df["track_number"], df[feature], color='#1DB954', marker='o')
-    ax.set_title(f"{feature} across {album_name}", fontsize=16, weight='bold')
-    ax.set_xlabel("Track number")
-    ax.set_ylabel(feature)
+    ax.set_title(f"{feature.title()} across {album_name.title()}", fontsize=16, weight='bold')
+    ax.set_xlabel("Track Number")
+    ax.set_ylabel(feature.title())
     ax.set_xticks(df["track_number"])
     ax.set_xticklabels(df["track_number"])
     ax.grid(axis='y', linestyle='--', alpha=0.3, color='white')
@@ -220,7 +220,7 @@ def plot_featured_artist_counts(df, album_name, artist_name):
     ax.barh(df["artist"], df["count"], color='#1DB954')
     short_artists = [name[:15] + "…" if len(name) > 15 else name for name in df["artist"]]
     ax.set_yticklabels(short_artists)
-    ax.set_title(f"Featured Artists on {album_name}", fontsize=16, weight='bold')
+    ax.set_title(f"Featured Artists on {album_name.title()}", fontsize=16, weight='bold')
     ax.set_xlabel("Number of Tracks")
     ax.set_ylabel("Artist")
     ax.set_xticks(np.arange(0, df["count"].max() + 1, 1))
@@ -234,11 +234,13 @@ def album_explicit_pie(database, album_name, artist_name):
         return None
     explicit_tracks = len(df[df["explicit"] == "true"])
     non_explicit_tracks = len(df[df["explicit"] == "false"])
-    fig, ax = plt.subplots(figsize=(4, 2))
-    ax.pie([explicit_tracks, non_explicit_tracks], autopct="%1.1f%%", pctdistance=0.7, startangle=90)
-    centre_circle = plt.Circle((0, 0), 0.5, fc="w")
+    fig, ax = plt.subplots(figsize=(4, 3))
+    fig.patch.set_facecolor('#121212')
+    ax.set_facecolor('#121212')
+    ax.pie([explicit_tracks, non_explicit_tracks], autopct="%1.1f%%", pctdistance=0.7, startangle=90, colors=['#1DB954', '#0E7C3A'])
+    centre_circle = plt.Circle((0, 0), 0.5, fc="#121212")
     fig.gca().add_artist(centre_circle)
-    ax.set_title(f"Explicit vs Non-explicit on {album_name}")
+    ax.set_title(f"Explicit vs Non-explicit on {album_name.title()}", color="w", fontsize=16, weight='bold')
     ax.legend(
         ["Explicit", "Non-explicit"],
         loc="upper left",
