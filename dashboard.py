@@ -78,8 +78,8 @@ def cached_release_date(_database, name, artist):
 def cached_album_tracks(_database, name, artist):
     return aldv.album_tracks(_database, name, artist)
 
-def plot_album_tracks(tracks_df, name, artist):
-    return aldv.plot_album_tracks(tracks_df, name, artist)
+def plot_album_tracks(tracks_df, name):
+    return aldv.plot_album_tracks(tracks_df, name)
 
 @st.cache_data
 def cached_album_track_popularity(_database, name, artist):
