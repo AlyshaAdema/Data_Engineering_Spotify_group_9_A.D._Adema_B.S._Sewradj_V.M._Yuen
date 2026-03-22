@@ -10,7 +10,6 @@ import full_database_visualization as fldv
 import features_data_analysis as fda
 import features_data_visualization as fdv
 import album_data_visualization as aldv
-import full_database_visualization as fdv
 
 st.set_page_config(
     page_title="Spotify Data Analysis",
